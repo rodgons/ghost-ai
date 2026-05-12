@@ -8,16 +8,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        default: "bg-accent-primary text-copy-primary [a]:hover:bg-accent-primary/80 cursor-pointer",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-border-default bg-surface hover:bg-subtle hover:text-copy-primary aria-expanded:bg-subtle aria-expanded:text-copy-primary",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-subtle text-copy-primary hover:bg-surface aria-expanded:bg-subtle aria-expanded:text-copy-primary",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "hover:bg-surface/80 hover:text-copy-primary aria-expanded:bg-surface/80 aria-expanded:text-copy-primary",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-state-error/10 text-state-error hover:bg-state-error/20 focus-visible:border-state-error/40 focus-visible:ring-state-error/20",
+        link: "text-accent-primary underline-offset-4 hover:underline",
       },
       size: {
         default:
@@ -49,7 +49,7 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />
   )
