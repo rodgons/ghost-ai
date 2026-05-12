@@ -5,11 +5,11 @@ change.
 
 ## Current Phase
 
-- [e.g. Not started / In progress / Complete]
+- In progress
 
 ## Current Goal
 
-- [What you are building right now]
+- Install and configure shadcn/ui and add UI primitive components
 
 ## Completed
 
@@ -17,21 +17,22 @@ change.
 
 ## In Progress
 
-- None yet.
+- Adding shadcn/ui components: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea
+- Installing lucide-react
+- Creating `lib/utils.ts` with reusable `cn()` helper
 
 ## Next Up
 
-- [First unit to build]
+- Generate and validate shadcn/ui components and ensure dark theme compatibility
 
 ## Open Questions
 
-- [Any unresolved product or technical decisions]
+- None at this time.
 
 ## Architecture Decisions
 
-- [Decisions made that affect the system design or
-  data model — include why the decision was made]
+- Use shadcn/ui for consistent component primitives and Tailwind integration
 
 ## Session Notes
 
-- [Context needed to resume work in the next session]
+- Started design-system implementation, waiting on package installation and component setup
