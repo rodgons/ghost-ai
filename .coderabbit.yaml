@@ -6,7 +6,4 @@ reviews:
   profile: "chill"
   path_filters:
     - "!components/ui/**"
-
-auto_review:
-  enabled: true
-  drafts: false
+    - "!.agents/**"

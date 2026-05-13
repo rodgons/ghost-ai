@@ -22,3 +22,8 @@ Read the following files in order before implementing or making any architectura
 Update `context/progress-tracker.md` after each meaningful implementation change.
 
 If implementation changes the architecture, scope, or standards documented in the context files, update the relevant file before continuing.
+
+## Check When Done
+
+- `pnpm format` to clean the code
+- consider done only when `pnpm lint` has no errors nor warnings
