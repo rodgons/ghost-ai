@@ -20,6 +20,7 @@ change.
 - Adding shadcn/ui components: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea
 - Installing lucide-react
 - Creating `lib/utils.ts` with reusable `cn()` helper
+- Building editor chrome components: `EditorNavbar`, `ProjectSidebar`
 
 ## Next Up
 
