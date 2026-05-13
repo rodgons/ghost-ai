@@ -11,9 +11,9 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded) {
       if (userId) {
-        router.push("/editor");
+        router.replace("/editor");
       } else {
-        router.push("/sign-in");
+        router.replace("/sign-in");
       }
     }
   }, [isLoaded, userId, router]);
