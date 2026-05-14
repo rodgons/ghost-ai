@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
@@ -12,8 +12,8 @@ if (!databaseUrl) {
 
 const createPrismaClient = () => {
   if (databaseUrl.startsWith("prisma+postgres://")) {
-    // Accelerate
-    return new PrismaClient();
+    // Accelerate - use accelerateUrl option
+    return new PrismaClient({ accelerateUrl: databaseUrl });
   } else {
     // Direct with pg adapter
     const pool = new pg.Pool({ connectionString: databaseUrl });
