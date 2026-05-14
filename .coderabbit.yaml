@@ -7,3 +7,4 @@ reviews:
   path_filters:
     - "!components/ui/**"
     - "!.agents/**"
+    - "!generated/**"
