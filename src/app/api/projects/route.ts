@@ -46,6 +46,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
   }
 
+  if (body.name !== undefined && typeof body.name !== "string") {
+    return NextResponse.json({ error: "Project name must be a string" }, { status: 400 });
+  }
+
   try {
     const name = body.name || "Untitled Project";
     const projectId = crypto.randomUUID();
