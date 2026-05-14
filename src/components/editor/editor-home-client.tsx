@@ -1,0 +1,232 @@
+"use client";
+
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { EditorNavbar } from "@/components/editor/editor-navbar";
+import { ProjectSidebar } from "@/components/editor/project-sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useProjectActions } from "@/hooks/use-project-actions";
+
+type Project = {
+  id: string;
+  name: string;
+  ownerId: string;
+  description: string | null;
+  status: "DRAFT" | "ARCHIVED";
+  canvasJsonPath: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type EditorHomeClientProps = {
+  ownedProjects: Project[];
+  sharedProjects: Project[];
+};
+
+/**
+ * Render the editor home page with a responsive sidebar and dialogs for creating, renaming, and deleting projects.
+ *
+ * Renders the top navigation, a project sidebar populated from the provided lists, a central call-to-action to create a new project, and a modal dialog whose contents and actions switch between create/rename/delete flows.
+ *
+ * @param ownedProjects - Projects owned by the current user, shown in the sidebar as owned items
+ * @param sharedProjects - Projects shared with the current user, shown in the sidebar as shared workspaces
+ * @returns The rendered React element for the editor home page
+ */
+export function EditorHomeClient({
+  ownedProjects,
+  sharedProjects,
+}: EditorHomeClientProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const desktopQuery = globalThis.matchMedia("(min-width: 1024px)");
+    const handleDesktopChange = (
+      event: MediaQueryListEvent | MediaQueryList,
+    ) => {
+      if (event.matches) {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    handleDesktopChange(desktopQuery);
+    desktopQuery.addEventListener("change", handleDesktopChange);
+    return () =>
+      desktopQuery.removeEventListener("change", handleDesktopChange);
+  }, []);
+
+  const {
+    dialogType,
+    selectedProjectId,
+    projectName,
+    setProjectName,
+    roomIdPreview,
+    isSlugValid,
+    isSubmitting,
+    openCreateDialog,
+    openRenameDialog,
+    openDeleteDialog,
+    closeDialog,
+    handleSubmit,
+  } = useProjectActions();
+
+  const handleRenameProject = (projectId: string) => {
+    const project = ownedProjects.find((p) => p.id === projectId);
+    if (project) {
+      openRenameDialog(projectId, project.name);
+    }
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    openDeleteDialog(projectId);
+  };
+
+  const selectedProject = ownedProjects.find((p) => p.id === selectedProjectId);
+
+  const mapProject = (p: Project, isOwned: boolean) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.id,
+    isOwned,
+    subtitle: isOwned ? "Owned project" : "Shared workspace",
+  });
+
+  return (
+    <>
+      <EditorNavbar
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen((value) => !value)}
+      />
+      <ProjectSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        ownedProjects={ownedProjects.map((p) => mapProject(p, true))}
+        sharedProjects={sharedProjects.map((p) => mapProject(p, false))}
+        onCreateProject={openCreateDialog}
+        onRenameProject={handleRenameProject}
+        onDeleteProject={handleDeleteProject}
+      />
+
+      <main className="min-h-screen bg-bg-base pt-14">
+        <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+          <section className="grow flex items-center justify-center rounded-3xl border border-border-default bg-bg-base/80 px-6 py-20 shadow-inner">
+            <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 text-center">
+              <h1 className="font-heading text-3xl font-semibold text-text-primary">
+                Create a project or open an existing one
+              </h1>
+              <p className="max-w-xl text-sm text-text-muted">
+                Start a new architecture workspace, or choose a project from the
+                sidebar.
+              </p>
+              <Button size="lg" onClick={openCreateDialog}>
+                <Plus />
+                New Project
+              </Button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <Dialog
+        open={dialogType !== null}
+        onOpenChange={(open) => !open && closeDialog()}
+      >
+        <DialogContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <DialogHeader>
+              <DialogTitle>
+                {dialogType === "create" && "Create project"}
+                {dialogType === "rename" && "Rename project"}
+                {dialogType === "delete" && "Delete project"}
+              </DialogTitle>
+              <DialogDescription>
+                {dialogType === "create" &&
+                  "Enter a project name and preview the auto-generated slug before creating your workspace."}
+                {dialogType === "rename" && selectedProject && (
+                  <>
+                    Rename <strong>{selectedProject.name}</strong> for a clearer
+                    workspace label.
+                  </>
+                )}
+                {dialogType === "delete" && selectedProject && (
+                  <>
+                    This will permanently remove{" "}
+                    <strong>{selectedProject.name}</strong> from your owned
+                    projects.
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {(dialogType === "create" || dialogType === "rename") && (
+              <div className="space-y-3">
+                <Input
+                  autoFocus={dialogType === "rename"}
+                  value={projectName}
+                  onChange={(event) => setProjectName(event.target.value)}
+                  placeholder="Project name"
+                  aria-label="Project name"
+                />
+                {dialogType === "create" && (
+                  <p className="text-sm text-text-muted">
+                    Room ID preview:{" "}
+                    <span className="font-medium text-text-primary">
+                      {roomIdPreview || "—"}
+                    </span>
+                  </p>
+                )}
+                {dialogType === "rename" && (
+                  <p className="text-sm text-text-muted">
+                    Room ID:{" "}
+                    <span className="font-medium text-text-primary">
+                      {selectedProjectId || "—"}
+                    </span>
+                  </p>
+                )}
+                {!isSlugValid && (
+                  <p className="text-sm text-state-error">
+                    Project name must include at least 3 letters or numbers to
+                    generate a valid slug.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={closeDialog}>
+                Cancel
+              </Button>
+              {dialogType === "create" && (
+                <Button type="submit" disabled={isSubmitting || !isSlugValid}>
+                  {isSubmitting ? "Creating…" : "Create project"}
+                </Button>
+              )}
+              {dialogType === "rename" && (
+                <Button type="submit" disabled={isSubmitting || !isSlugValid}>
+                  {isSubmitting ? "Renaming…" : "Rename project"}
+                </Button>
+              )}
+              {dialogType === "delete" && (
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Deleting…" : "Delete project"}
+                </Button>
+              )}
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

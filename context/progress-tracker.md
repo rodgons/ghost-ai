@@ -25,6 +25,12 @@ change.
 - Styled auth pages with design system colors and lucide icons
 - Added editor home prompt, create project dialog, and sidebar rename/delete actions
 - Implemented Prisma data models, client singleton, and first migration
+- Implemented Project API routes (list, create, rename, delete)
+- Wired editor home sidebar and dialogs to Project API
+- Added room ID preview and aligned create project IDs with workspace navigation
+- Changed sidebar project slug display to show project ID instead of slugified name
+- Updated rename dialog to show current project ID in slug field instead of slug preview
+- Removed deprecated middleware.ts file to resolve proxy.ts conflict
 
 ## In Progress
 

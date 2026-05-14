@@ -23,6 +23,8 @@ Update `context/progress-tracker.md` after each meaningful implementation change
 
 If implementation changes the architecture, scope, or standards documented in the context files, update the relevant file before continuing.
 
+NEVER commit without being explicitly told to.
+
 ## Check When Done
 
 - `pnpm format` to clean the code
