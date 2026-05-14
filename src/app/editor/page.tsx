@@ -20,7 +20,7 @@ export default function EditorPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const desktopQuery = globalThis.matchMedia("(min-width: 1024px)");
     const handleDesktopChange = (
       event: MediaQueryListEvent | MediaQueryList,
     ) => {

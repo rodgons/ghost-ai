@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Implement editor home project dialogs and sidebar actions
+- Continue with next features
 
 ## Completed
 
@@ -24,6 +24,7 @@ change.
 - Applied fonts as CSS variables and Tailwind tokens
 - Styled auth pages with design system colors and lucide icons
 - Added editor home prompt, create project dialog, and sidebar rename/delete actions
+- Implemented Prisma data models, client singleton, and first migration
 
 ## In Progress
 
