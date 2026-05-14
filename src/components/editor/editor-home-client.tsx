@@ -19,9 +19,12 @@ import { useProjectActions } from "@/hooks/use-project-actions";
 type Project = {
   id: string;
   name: string;
-  slug: string;
-  isOwned: boolean;
-  subtitle: string;
+  ownerId: string;
+  description: string | null;
+  status: "DRAFT" | "ARCHIVED";
+  canvasJsonPath: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type EditorHomeClientProps = {
@@ -56,7 +59,7 @@ export function EditorHomeClient({
     selectedProjectId,
     projectName,
     setProjectName,
-    slugPreview,
+    roomIdPreview,
     isSlugValid,
     isSubmitting,
     openCreateDialog,
@@ -79,6 +82,14 @@ export function EditorHomeClient({
 
   const selectedProject = ownedProjects.find((p) => p.id === selectedProjectId);
 
+  const mapProject = (p: Project, isOwned: boolean) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.id,
+    isOwned,
+    subtitle: isOwned ? "Owned project" : "Shared workspace",
+  });
+
   return (
     <>
       <EditorNavbar
@@ -88,8 +99,8 @@ export function EditorHomeClient({
       <ProjectSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        ownedProjects={ownedProjects}
-        sharedProjects={sharedProjects}
+        ownedProjects={ownedProjects.map((p) => mapProject(p, true))}
+        sharedProjects={sharedProjects.map((p) => mapProject(p, false))}
         onCreateProject={openCreateDialog}
         onRenameProject={handleRenameProject}
         onDeleteProject={handleDeleteProject}
@@ -155,12 +166,22 @@ export function EditorHomeClient({
                   placeholder="Project name"
                   aria-label="Project name"
                 />
-                <p className="text-sm text-text-muted">
-                  Slug preview:{" "}
-                  <span className="font-medium text-text-primary">
-                    {slugPreview || "—"}
-                  </span>
-                </p>
+                {dialogType === "create" && (
+                  <p className="text-sm text-text-muted">
+                    Room ID preview:{" "}
+                    <span className="font-medium text-text-primary">
+                      {roomIdPreview || "—"}
+                    </span>
+                  </p>
+                )}
+                {dialogType === "rename" && (
+                  <p className="text-sm text-text-muted">
+                    Room ID:{" "}
+                    <span className="font-medium text-text-primary">
+                      {selectedProjectId || "—"}
+                    </span>
+                  </p>
+                )}
                 {!isSlugValid && (
                   <p className="text-sm text-state-error">
                     Project name must include at least 3 letters or numbers to

@@ -28,7 +28,7 @@ export async function getProjects() {
     const user = await client.users.getUser(userId);
     const email = user.emailAddresses[0]?.emailAddress;
 
-    let sharedProjects = [];
+    let sharedProjects = [] as typeof ownedProjects;
     if (email) {
       const collaborations = await prisma.projectCollaborator.findMany({
         where: {

@@ -4,7 +4,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 
 interface CreateProjectBody {
+  id?: string;
   name?: string;
+}
+
+function isValidProjectId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) &&
+    value.length >= 3
+  );
 }
 
 export async function GET() {
@@ -62,9 +71,19 @@ export async function POST(req: Request) {
     );
   }
 
+  if (body.id !== undefined && !isValidProjectId(body.id)) {
+    return NextResponse.json(
+      { error: "Project id must be a valid slug" },
+      { status: 400 },
+    );
+  }
+
   try {
     const name = body.name || "Untitled Project";
-    const projectId = crypto.randomUUID();
+    const projectId =
+      typeof body.id === "string" && body.id.length > 0
+        ? body.id
+        : crypto.randomUUID();
 
     const project = await prisma.project.create({
       data: {
