@@ -15,9 +15,6 @@ export async function GET() {
       where: {
         ownerId: userId,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
     });
 
     return NextResponse.json(projects, { status: 200 });
