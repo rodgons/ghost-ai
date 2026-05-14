@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import crypto from "crypto";
 
+interface CreateProjectBody {
+  name?: string;
+}
+
 export async function GET() {
   const { userId } = await auth();
 
@@ -31,8 +35,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let body: CreateProjectBody;
   try {
-    const body = await req.json();
+    body = await req.json();
+  } catch (error) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
+  }
+
+  try {
     const name = body.name || "Untitled Project";
     const projectId = crypto.randomUUID();
 
