@@ -1,6 +1,11 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "../../lib/prisma";
 
+/**
+ * Retrieve projects owned by the authenticated user and projects shared with them via collaborator email.
+ *
+ * @returns An object with `ownedProjects` — an array of projects where the user is the owner, and `sharedProjects` — an array of projects where the user's primary email is listed as a collaborator. If there is no authenticated user or an error occurs, both arrays will be empty.
+ */
 export async function getProjects() {
   const { userId } = await auth();
 

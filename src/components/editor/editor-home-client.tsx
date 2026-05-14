@@ -32,6 +32,15 @@ type EditorHomeClientProps = {
   sharedProjects: Project[];
 };
 
+/**
+ * Render the editor home page with a responsive sidebar and dialogs for creating, renaming, and deleting projects.
+ *
+ * Renders the top navigation, a project sidebar populated from the provided lists, a central call-to-action to create a new project, and a modal dialog whose contents and actions switch between create/rename/delete flows.
+ *
+ * @param ownedProjects - Projects owned by the current user, shown in the sidebar as owned items
+ * @param sharedProjects - Projects shared with the current user, shown in the sidebar as shared workspaces
+ * @returns The rendered React element for the editor home page
+ */
 export function EditorHomeClient({
   ownedProjects,
   sharedProjects,

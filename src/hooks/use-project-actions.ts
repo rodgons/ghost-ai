@@ -3,6 +3,12 @@ import { type SyntheticEvent, useMemo, useState } from "react";
 
 type DialogType = "create" | "rename" | "delete" | null;
 
+/**
+ * Converts a string into a URL/room-friendly slug.
+ *
+ * @param value - The input string to convert.
+ * @returns The lowercased, trimmed slug where one-or-more non-[a-z0-9] characters are replaced by `-`, and leading or trailing `-` characters are removed.
+ */
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -11,10 +17,37 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+/**
+ * Creates a short, lowercase random 4-character suffix.
+ *
+ * @returns A 4-character lowercase string derived from a UUID
+ */
 function generateSuffix() {
   return crypto.randomUUID().slice(0, 4).toLowerCase();
 }
 
+/**
+ * Manage project create/rename/delete dialog state and perform corresponding API actions.
+ *
+ * Provides local state for the active dialog, the targeted project, editable project name,
+ * a generated room id suffix, and a submitting flag. Exposes derived values (slug and room id previews,
+ * slug validity), dialog open/close handlers, and a form submit handler that dispatches to create/rename/delete API calls.
+ *
+ * @returns An object with:
+ * - `dialogType` — the active dialog type (`"create" | "rename" | "delete" | null`)
+ * - `selectedProjectId` — id of the project targeted by rename/delete, or `null`
+ * - `projectName` — current editable project name
+ * - `setProjectName` — setter for `projectName`
+ * - `slugPreview` — URL-friendly slug derived from `projectName`
+ * - `roomIdPreview` — composed room id preview (slug optionally suffixed)
+ * - `isSlugValid` — `true` if `slugPreview` length is greater than or equal to 3, `false` otherwise
+ * - `isSubmitting` — `true` while an API request is in flight, `false` otherwise
+ * - `openCreateDialog()` — open the create dialog and initialize state
+ * - `openRenameDialog(projectId, currentName)` — open the rename dialog for a project
+ * - `openDeleteDialog(projectId)` — open the delete dialog for a project
+ * - `closeDialog()` — reset dialog state
+ * - `handleSubmit(event)` — form submit handler that delegates to the active operation
+ */
 export function useProjectActions() {
   const router = useRouter();
   const pathname = usePathname();

@@ -2,6 +2,20 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 
+/**
+ * Update a project's name if the authenticated user is the project owner.
+ *
+ * Validates authentication, ownership, and request body; updates the project's
+ * `name` when provided and returns the updated project.
+ *
+ * @param params - A promise resolving to an object containing `projectId`.
+ * @returns The HTTP response:
+ * - On success: JSON of the updated project with status 200.
+ * - 400 when the request body is invalid or malformed.
+ * - 401 when the requester is unauthenticated.
+ * - 403 when the project does not exist or the requester is not the owner.
+ * - 500 for unexpected server errors.
+ */
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ projectId: string }> },
@@ -64,6 +78,12 @@ export async function PATCH(
   }
 }
 
+/**
+ * Deletes the project identified by `projectId` if the authenticated user is the owner.
+ *
+ * @param params - A promise resolving to an object containing the `projectId` route parameter.
+ * @returns A NextResponse: status 204 on successful deletion; JSON error responses with statuses 401, 403, or 500 otherwise.
+ */
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ projectId: string }> },

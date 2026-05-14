@@ -8,6 +8,12 @@ interface CreateProjectBody {
   name?: string;
 }
 
+/**
+ * Determines whether a value is a valid project id in slug format.
+ *
+ * @param value - The value to validate as a project id
+ * @returns `true` if `value` is a string containing only lowercase letters, digits, and hyphens, matches the slug pattern (no leading/trailing or consecutive hyphens), and is at least 3 characters long; `false` otherwise.
+ */
 function isValidProjectId(value: unknown): value is string {
   return (
     typeof value === "string" &&
@@ -16,6 +22,11 @@ function isValidProjectId(value: unknown): value is string {
   );
 }
 
+/**
+ * Handle GET requests to list projects owned by the authenticated user.
+ *
+ * @returns `200` with the authenticated user's projects as JSON; `401` with `{ error: "Unauthorized" }` if the request is unauthenticated; `500` with `{ error: "Internal Server Error" }` if an internal error occurs.
+ */
 export async function GET() {
   const { userId } = await auth();
 
@@ -40,6 +51,14 @@ export async function GET() {
   }
 }
 
+/**
+ * Create a new project owned by the authenticated user.
+ *
+ * Accepts a JSON body with optional `id` (slug) and `name`. If `id` is omitted or empty a UUID is generated; if `name` is omitted it defaults to `"Untitled Project"`.
+ *
+ * @param req - The incoming request whose JSON body may include `{ id?: string, name?: string }`
+ * @returns The created project object
+ */
 export async function POST(req: Request) {
   const { userId } = await auth();
 
