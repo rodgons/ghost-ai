@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Auth feature fully implemented and validated
+- Implement editor home project dialogs and sidebar actions
 
 ## Completed
 
@@ -23,6 +23,7 @@ change.
 - Implemented Geist Sans and Geist Mono fonts from next/font/google
 - Applied fonts as CSS variables and Tailwind tokens
 - Styled auth pages with design system colors and lucide icons
+- Added editor home prompt, create project dialog, and sidebar rename/delete actions
 
 ## In Progress
 
