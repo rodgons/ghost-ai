@@ -1,7 +1,7 @@
+import crypto from "node:crypto";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import crypto from "crypto";
 
 interface CreateProjectBody {
   name?: string;
@@ -22,9 +22,12 @@ export async function GET() {
     });
 
     return NextResponse.json(projects, { status: 200 });
-  } catch (error) {
+  } catch (_error) {
     console.error("[PROJECTS_GET]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -38,16 +41,25 @@ export async function POST(req: Request) {
   let body: CreateProjectBody;
   try {
     body = await req.json();
-  } catch (error) {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  } catch (_error) {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
   }
 
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Request body must be an object" },
+      { status: 400 },
+    );
   }
 
   if (body.name !== undefined && typeof body.name !== "string") {
-    return NextResponse.json({ error: "Project name must be a string" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Project name must be a string" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -64,8 +76,11 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(project, { status: 201 });
-  } catch (error) {
+  } catch (_error) {
     console.error("[PROJECTS_POST]", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
