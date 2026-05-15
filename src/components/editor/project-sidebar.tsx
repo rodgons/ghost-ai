@@ -1,4 +1,5 @@
 import { Pencil, Plus, Trash2, XIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ type ProjectSidebarProps = {
   onCreateProject: () => void;
   onRenameProject: (projectId: string) => void;
   onDeleteProject: (projectId: string) => void;
+  currentProjectId?: string;
 };
 
 function EmptyProjectsPlaceholder({ text }: Readonly<{ text: string }>) {
@@ -46,31 +48,45 @@ function ProjectItem({
   project,
   onRename,
   onDelete,
+  isCurrent,
 }: Readonly<{
   project: Project;
   onRename: (projectId: string) => void;
   onDelete: (projectId: string) => void;
+  isCurrent?: boolean;
 }>) {
   return (
-    <div className="rounded-3xl border border-border-default bg-bg-surface p-4 shadow-sm">
+    <div
+      className={`rounded-3xl border p-4 shadow-sm transition-all ${
+        isCurrent
+          ? "border-accent-ai bg-accent-ai/10"
+          : "border-border-default bg-bg-surface hover:bg-bg-surface/80"
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <Link
+          href={`/editor/${project.id}`}
+          className="flex-1 text-left cursor-pointer"
+          aria-label={`Open project ${project.name}`}
+        >
           <p className="font-medium text-text-primary">{project.name}</p>
           <p className="mt-1 text-sm text-text-muted">/{project.slug}</p>
-        </div>
+          <p className="mt-3 text-sm text-text-muted">{project.subtitle}</p>
+        </Link>
         <span className="rounded-full border border-border-default bg-muted px-2 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-text-muted">
           {project.isOwned ? "Owned" : "Shared"}
         </span>
       </div>
-
-      <p className="mt-3 text-sm text-text-muted">{project.subtitle}</p>
 
       {project.isOwned ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
             variant="secondary"
             size="xs"
-            onClick={() => onRename(project.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRename(project.id);
+            }}
           >
             <Pencil />
             Rename
@@ -78,7 +94,10 @@ function ProjectItem({
           <Button
             variant="ghost"
             size="xs"
-            onClick={() => onDelete(project.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(project.id);
+            }}
           >
             <Trash2 />
             Delete
@@ -97,6 +116,7 @@ export function ProjectSidebar({
   onCreateProject,
   onRenameProject,
   onDeleteProject,
+  currentProjectId,
 }: Readonly<ProjectSidebarProps>) {
   const asideRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -194,6 +214,7 @@ export function ProjectSidebar({
                   project={project}
                   onRename={onRenameProject}
                   onDelete={onDeleteProject}
+                  isCurrent={currentProjectId === project.id}
                 />
               ))
             ) : (
@@ -212,6 +233,7 @@ export function ProjectSidebar({
                   project={project}
                   onRename={() => undefined}
                   onDelete={() => undefined}
+                  isCurrent={currentProjectId === project.id}
                 />
               ))
             ) : (

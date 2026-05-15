@@ -4,6 +4,8 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
+THIS VERSION OF NEXTJS DOES NOT USE MIDDLEWARE.TS, USE PROXY.TS
+
 Always use `pnpm` when rendering or running Node.js-related commands, installs, or scripts in this workspace.
 
 <!-- END:nextjs-agent-rules -->

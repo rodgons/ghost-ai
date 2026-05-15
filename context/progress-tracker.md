@@ -31,6 +31,16 @@ change.
 - Changed sidebar project slug display to show project ID instead of slugified name
 - Updated rename dialog to show current project ID in slug field instead of slug preview
 - Removed deprecated middleware.ts file to resolve proxy.ts conflict
+- Implemented editor workspace shell at `/editor/[roomId]` with server-side access checks
+- Created `AccessDenied` component with centered layout, lock icon, and return link
+- Created `lib/project-access.ts` with helpers for Clerk identity and project access checks
+- Built full-viewport workspace layout with navbar, project sidebar, canvas placeholder, and AI sidebar
+- Fixed runtime error by removing unnecessary projects hook dependency
+- Implemented Share Dialog feature with collaborator management
+- Created API routes for listing, inviting, and removing collaborators
+- Integrated Clerk Backend API for enriching collaborator data with display names and avatars
+- Added Share button to editor navbar with copy link functionality
+- Owner/collaborator permission enforcement server-side
 
 ## In Progress
 

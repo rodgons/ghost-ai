@@ -44,7 +44,7 @@ type EditorHomeClientProps = {
 export function EditorHomeClient({
   ownedProjects,
   sharedProjects,
-}: EditorHomeClientProps) {
+}: Readonly<EditorHomeClientProps>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
