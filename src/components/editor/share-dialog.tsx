@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, Loader2, Plus, Trash2, User } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ export function ShareDialog({
   onOpenChange,
   projectId,
   isOwner,
-}: ShareDialogProps) {
+}: Readonly<ShareDialogProps>) {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -114,8 +115,21 @@ export function ShareDialog({
       );
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to remove collaborator");
+        const contentType = response.headers.get("content-type");
+        if (
+          contentType?.includes("application/json") &&
+          response.status !== 204
+        ) {
+          try {
+            const data = await response.json();
+            throw new Error(data.error || "Failed to remove collaborator");
+          } catch {
+            throw new Error(
+              `Failed to remove collaborator: ${response.statusText}`,
+            );
+          }
+        }
+        throw new Error("Failed to remove collaborator");
       }
 
       await loadCollaborators();
@@ -128,13 +142,13 @@ export function ShareDialog({
   };
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/editor/${projectId}`;
+    const url = `${globalThis.location.origin}/editor/${projectId}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleInvite();
   };
@@ -182,63 +196,76 @@ export function ShareDialog({
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Collaborators</h4>
             <div className="max-h-60 overflow-y-auto space-y-2">
-              {isLoading && collaborators.length === 0 ? (
+              {isLoading && collaborators.length === 0 && (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
-              ) : collaborators.length === 0 ? (
+              )}
+              {collaborators.length === 0 && !isLoading && (
                 <div className="text-sm text-muted-foreground py-4 text-center">
                   No collaborators yet
                 </div>
-              ) : (
-                collaborators.map((collaborator) => (
-                  <div
-                    key={collaborator.id}
-                    className={cn(
-                      "flex items-center justify-between gap-3 rounded-lg border p-3",
-                      collaborator.isOwner
-                        ? "border-border-default bg-muted/50"
-                        : "border-border-default bg-card",
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                        {collaborator.avatarUrl ? (
-                          <img
-                            src={collaborator.avatarUrl}
-                            alt={collaborator.displayName || collaborator.email}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          {collaborator.displayName || collaborator.email}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {collaborator.email}
-                        </p>
-                      </div>
-                    </div>
-                    {collaborator.isOwner ? (
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Owner
-                      </span>
-                    ) : isOwner ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemove(collaborator.email)}
-                        disabled={isLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    ) : null}
-                  </div>
-                ))
               )}
+              {collaborators.length > 0 &&
+                collaborators.map((collaborator) => {
+                  const cardClass = collaborator.isOwner
+                    ? "border-border-default bg-muted/50"
+                    : "border-border-default bg-card";
+                  return (
+                    <div
+                      key={collaborator.id}
+                      className={cn(
+                        "flex items-center justify-between gap-3 rounded-lg border p-3",
+                        cardClass,
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"
+                          suppressHydrationWarning
+                        >
+                          {collaborator.avatarUrl ? (
+                            <Image
+                              src={collaborator.avatarUrl}
+                              alt={
+                                collaborator.displayName || collaborator.email
+                              }
+                              width={32}
+                              height={32}
+                              className="h-8 w-8 rounded-full object-cover"
+                              suppressHydrationWarning
+                            />
+                          ) : (
+                            <User className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {collaborator.displayName || collaborator.email}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {collaborator.email}
+                          </p>
+                        </div>
+                      </div>
+                      {collaborator.isOwner && (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Owner
+                        </span>
+                      )}
+                      {isOwner && !collaborator.isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemove(collaborator.email)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import type { Project } from "@prisma/client";
 import { Bot, LayoutGrid, Share2 } from "lucide-react";
 import { useState } from "react";
@@ -16,6 +17,7 @@ export function EditorWorkspace({ project }: EditorWorkspaceProps) {
   const [isProjectSidebarOpen, setIsProjectSidebarOpen] = useState(true);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const { user } = useUser();
 
   const toggleProjectSidebar = () => {
     setIsProjectSidebarOpen(!isProjectSidebarOpen);
@@ -25,7 +27,7 @@ export function EditorWorkspace({ project }: EditorWorkspaceProps) {
     setIsAiSidebarOpen(!isAiSidebarOpen);
   };
 
-  const isOwner = true;
+  const isOwner = user?.id === project.ownerId;
 
   // Empty arrays for now - will be populated when navigation is implemented
   const ownedProjects: {

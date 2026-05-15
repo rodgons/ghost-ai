@@ -2,6 +2,15 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../../../lib/prisma";
 
+function sanitizeError(error: unknown): { message: string; stack?: string } {
+  const message = error instanceof Error ? error.message : String(error);
+  const redacted = message.replace(/email[^\s]*/gi, "[REDACTED]");
+  if (error instanceof Error) {
+    return { message: redacted, stack: error.stack };
+  }
+  return { message: redacted };
+}
+
 /**
  * GET /api/projects/[projectId]/collaborators
  * List all collaborators for a project with enriched Clerk data
@@ -64,37 +73,45 @@ export async function GET(
       })),
     ];
 
-    const enrichedCollaborators = await Promise.all(
-      collaborators.map(async (c) => {
-        if (c.isOwner) {
-          return c;
-        }
+    const nonOwnerEmails = collaborators
+      .filter((c) => !c.isOwner)
+      .map((c) => c.email);
 
-        const clerkUsersResponse = await client.users.getUserList({
-          emailAddress: [c.email],
-        });
+    const clerkUsersResponse = await client.users.getUserList({
+      emailAddress: nonOwnerEmails,
+    });
 
-        const clerkUsers = clerkUsersResponse.data || [];
-
-        if (clerkUsers.length > 0) {
-          const clerkUser = clerkUsers[0];
-          return {
-            ...c,
-            displayName:
-              clerkUser.firstName && clerkUser.lastName
-                ? `${clerkUser.firstName} ${clerkUser.lastName}`
-                : clerkUser.username || c.email,
-            avatarUrl: clerkUser.imageUrl,
-          };
-        }
-
-        return c;
-      }),
+    const userLookup = new Map(
+      clerkUsersResponse.data.map((u) => [
+        u.emailAddresses[0]?.emailAddress || "",
+        u,
+      ]),
     );
+
+    const enrichedCollaborators = collaborators.map((c) => {
+      if (c.isOwner) {
+        return c;
+      }
+
+      const clerkUser = userLookup.get(c.email);
+      if (clerkUser) {
+        return {
+          ...c,
+          displayName:
+            clerkUser.firstName && clerkUser.lastName
+              ? `${clerkUser.firstName} ${clerkUser.lastName}`
+              : clerkUser.username || c.email,
+          avatarUrl: clerkUser.imageUrl,
+        };
+      }
+
+      return c;
+    });
 
     return NextResponse.json({ collaborators: enrichedCollaborators });
   } catch (error) {
-    console.error("[COLLABORATORS_GET]", error);
+    const sanitized = sanitizeError(error);
+    console.error("[COLLABORATORS_GET]", sanitized.message);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -173,7 +190,15 @@ export async function POST(
       );
     }
 
-    if (email === (await getCurrentUserEmail(userId))?.toLowerCase()) {
+    const currentEmail = await getCurrentUserEmail(userId);
+    if (!currentEmail) {
+      return NextResponse.json(
+        { error: "Unable to verify current user email" },
+        { status: 500 },
+      );
+    }
+
+    if (email === currentEmail.toLowerCase()) {
       return NextResponse.json(
         { error: "Cannot invite yourself" },
         { status: 400 },
@@ -192,7 +217,8 @@ export async function POST(
       email: collaborator.email,
     });
   } catch (error) {
-    console.error("[COLLABORATORS_POST]", error);
+    const sanitized = sanitizeError(error);
+    console.error("[COLLABORATORS_POST]", sanitized.message);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -265,7 +291,8 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error("[COLLABORATORS_DELETE]", error);
+    const sanitized = sanitizeError(error);
+    console.error("[COLLABORATORS_DELETE]", sanitized.message);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
