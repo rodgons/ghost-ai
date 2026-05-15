@@ -116,20 +116,19 @@ export function ShareDialog({
 
       if (!response.ok) {
         const contentType = response.headers.get("content-type");
+        let errorMessage = "Failed to remove collaborator";
         if (
           contentType?.includes("application/json") &&
           response.status !== 204
         ) {
           try {
             const data = await response.json();
-            throw new Error(data.error || "Failed to remove collaborator");
+            errorMessage = data.error || "Failed to remove collaborator";
           } catch {
-            throw new Error(
-              `Failed to remove collaborator: ${response.statusText}`,
-            );
+            errorMessage = `Failed to remove collaborator: ${response.statusText}`;
           }
         }
-        throw new Error("Failed to remove collaborator");
+        throw new Error(errorMessage);
       }
 
       await loadCollaborators();
@@ -141,11 +140,34 @@ export function ShareDialog({
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const url = `${globalThis.location.origin}/editor/${projectId}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        const success = document.execCommand("copy");
+        if (success) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } else {
+          setError("Failed to copy link");
+        }
+      } catch {
+        setError("Failed to copy link");
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -259,8 +281,9 @@ export function ShareDialog({
                           size="icon"
                           onClick={() => handleRemove(collaborator.email)}
                           disabled={isLoading}
+                          aria-label={`Remove collaborator ${collaborator.email}`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       )}
                     </div>

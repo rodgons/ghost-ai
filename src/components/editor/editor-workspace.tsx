@@ -29,7 +29,6 @@ export function EditorWorkspace({ project }: EditorWorkspaceProps) {
 
   const isOwner = user?.id === project.ownerId;
 
-  // Empty arrays for now - will be populated when navigation is implemented
   const ownedProjects: {
     id: string;
     name: string;
@@ -147,6 +146,8 @@ export function EditorWorkspace({ project }: EditorWorkspaceProps) {
             "fixed right-0 top-14 bottom-0 w-80 border-l border-border-default bg-bg-surface transition-transform duration-300 ease-out",
             isAiSidebarOpen ? "translate-x-0" : "translate-x-full",
           )}
+          aria-hidden={!isAiSidebarOpen}
+          inert={!isAiSidebarOpen}
         >
           {/* Share Dialog */}
           <ShareDialog

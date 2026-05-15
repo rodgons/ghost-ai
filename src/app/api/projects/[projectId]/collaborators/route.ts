@@ -41,8 +41,9 @@ export async function GET(
 
     if (project.ownerId !== userId) {
       const currentUserEmail = await getCurrentUserEmail(userId);
+      const normalizedEmail = currentUserEmail?.trim().toLowerCase() ?? "";
       const isCollaborator = project.collaborators.some(
-        (c) => c.email === currentUserEmail,
+        (c) => c.email === normalizedEmail,
       );
       if (!isCollaborator) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -157,6 +158,14 @@ export async function POST(
     );
   }
 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(body.email.trim())) {
+    return NextResponse.json(
+      { error: "Invalid email format" },
+      { status: 400 },
+    );
+  }
+
   try {
     const { projectId } = await params;
 
@@ -198,7 +207,9 @@ export async function POST(
       );
     }
 
-    if (email === currentEmail.toLowerCase()) {
+    const normalizedCurrentEmail = currentEmail.trim().toLowerCase();
+
+    if (email === normalizedCurrentEmail) {
       return NextResponse.json(
         { error: "Cannot invite yourself" },
         { status: 400 },
@@ -248,6 +259,13 @@ export async function DELETE(
     if (!email) {
       return NextResponse.json(
         { error: "Email parameter is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!emailRegex.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
         { status: 400 },
       );
     }
@@ -304,7 +322,10 @@ async function getCurrentUserEmail(userId: string): Promise<string | null> {
   try {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    return user.emailAddresses[0]?.emailAddress || null;
+    const email =
+      user.primaryEmailAddress?.emailAddress ||
+      user.emailAddresses[0]?.emailAddress;
+    return email ? email.trim().toLowerCase() : null;
   } catch {
     return null;
   }

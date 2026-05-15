@@ -15,7 +15,9 @@ export async function getCurrentUser() {
   try {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    const email = user.emailAddresses[0]?.emailAddress;
+    const email =
+      user.primaryEmailAddress?.emailAddress ||
+      user.emailAddresses[0]?.emailAddress;
 
     return {
       userId,
@@ -23,7 +25,10 @@ export async function getCurrentUser() {
     };
   } catch (error) {
     console.error("[GET_CURRENT_USER_ERROR]", error);
-    return null;
+    return {
+      userId,
+      email: null,
+    };
   }
 }
 
@@ -80,7 +85,7 @@ export async function hasProjectAccess(
 export async function getProjectWithAccessCheck(roomId: string) {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser) {
+  if (!currentUser || !currentUser.userId) {
     return {
       project: null,
       hasAccess: false,
