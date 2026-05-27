@@ -65,7 +65,7 @@ export function ProjectSidebar({
             aria-label="Close project sidebar"
             className="rounded-full"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" suppressHydrationWarning />
           </Button>
         </div>
 
@@ -97,14 +97,14 @@ export function ProjectSidebar({
                 <EmptyState
                   title="No projects yet"
                   description="Create your first project to start building."
-                  icon={<FolderKanban className="h-5 w-5" />}
+                  icon={<FolderKanban className="h-5 w-5" suppressHydrationWarning />}
                 />
               </TabsContent>
               <TabsContent value="shared" className="mt-0">
                 <EmptyState
                   title="No shared projects"
                   description="Projects shared with you will appear here."
-                  icon={<FolderKanban className="h-5 w-5" />}
+                  icon={<FolderKanban className="h-5 w-5" suppressHydrationWarning />}
                 />
               </TabsContent>
             </ScrollArea>
@@ -113,7 +113,7 @@ export function ProjectSidebar({
 
         <div className="border-t border-border p-4">
           <Button variant="default" className="w-full gap-2">
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" suppressHydrationWarning />
             New Project
           </Button>
         </div>
