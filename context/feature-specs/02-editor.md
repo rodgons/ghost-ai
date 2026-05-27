@@ -1,4 +1,4 @@
-Read `README.md` before starting.
+Read `AGENTS.md` before starting.
 
 You are a senior frontend architect working inside an existing Next.js + TypeScript + shadcn/ui codebase.
 
