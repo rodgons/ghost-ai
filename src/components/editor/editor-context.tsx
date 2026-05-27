@@ -10,6 +10,12 @@ interface EditorContextType {
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
+/**
+ * Provides editor UI state to descendant components and manages the sidebar open state.
+ *
+ * @param children - React nodes rendered within the provider
+ * @returns A React provider element that supplies `sidebarOpen`, `setSidebarOpen`, and `toggleSidebar` to descendant components via `EditorContext`
+ */
 export function EditorProvider({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -24,6 +30,12 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Accesses the current editor context.
+ *
+ * @returns The editor context containing `sidebarOpen`, `setSidebarOpen`, and `toggleSidebar`.
+ * @throws Error if called outside an EditorProvider.
+ */
 export function useEditor() {
   const context = useContext(EditorContext);
   if (context === undefined) {

@@ -14,6 +14,17 @@ interface EditorNavbarProps {
   sidebarId?: string;
 }
 
+/**
+ * Render a fixed top editor navigation bar with a sidebar toggle, an optional center slot, and an optional right slot.
+ *
+ * @param sidebarOpen - Whether the sidebar is currently open; controls toggle icon and ARIA expanded state.
+ * @param onToggleSidebar - Click handler invoked to toggle the sidebar open/closed.
+ * @param centerSection - Optional content to render centered in the navbar.
+ * @param rightSection - Optional content to render aligned to the right of the navbar.
+ * @param className - Additional CSS classes applied to the header element.
+ * @param sidebarId - `aria-controls` target ID for the sidebar (defaults to `"editor-project-sidebar"`).
+ * @returns The header element containing the editor navigation bar.
+ */
 export function EditorNavbar({
   sidebarOpen,
   onToggleSidebar,

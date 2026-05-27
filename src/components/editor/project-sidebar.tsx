@@ -13,6 +13,16 @@ interface ProjectSidebarProps {
   id?: string;
 }
 
+/**
+ * Render the project sidebar containing workspace heading, tabbed "My Projects" and "Shared" panes, and a footer action.
+ *
+ * Renders a right-side collapsible panel that shows two tabs with empty-state placeholders and a "New Project" button. The panel's visibility, width, and slide-in transform are driven by `isOpen`.
+ *
+ * @param isOpen - Whether the sidebar is open (expanded) or closed (collapsed)
+ * @param onClose - Callback invoked when the close button is clicked
+ * @param id - Optional id applied to the aside element (defaults to `"editor-project-sidebar"`)
+ * @returns The sidebar React element
+ */
 export function ProjectSidebar({
   isOpen,
   onClose,
@@ -112,6 +122,14 @@ export function ProjectSidebar({
   );
 }
 
+/**
+ * Renders a centered empty-state card with an icon, title, and description.
+ *
+ * @param title - The main title text displayed in the card
+ * @param description - The secondary descriptive text shown below the title
+ * @param icon - A React node rendered inside the square icon container above the title
+ * @returns A JSX element representing the empty-state card
+ */
 function EmptyState({
   title,
   description,

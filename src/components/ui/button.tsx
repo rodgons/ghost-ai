@@ -40,6 +40,14 @@ const buttonVariants = cva(
   },
 );
 
+/**
+ * Renders a Base UI button with variant- and size-based styling, merging any provided `className`.
+ *
+ * @param className - Additional CSS classes to merge with the computed variant/size classes
+ * @param variant - Visual style variant to apply (e.g., "default", "outline", "secondary", "ghost", "destructive", "link")
+ * @param size - Size key to apply (e.g., "default", "xs", "sm", "lg", "icon", "icon-xs", "icon-sm", "icon-lg")
+ * @returns A `ButtonPrimitive` element with the computed class names and forwarded props
+ */
 function Button({
   className,
   variant = "default",

@@ -5,6 +5,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Root Tabs component that provides tab state and orientation for its children.
+ *
+ * @param orientation - Layout orientation for the tabs; either `"horizontal"` or `"vertical"`. Defaults to `"horizontal"`.
+ * @returns The rendered Tabs root element with applied data attributes and merged class names.
+ */
 function Tabs({
   className,
   orientation = "horizontal",
@@ -38,6 +44,13 @@ const tabsListVariants = cva(
   },
 );
 
+/**
+ * Renders a styled tabs list container with selectable visual variants.
+ *
+ * @param className - Additional class names to merge with the component's base styling
+ * @param variant - Visual variant for the list; `"default"` applies a muted background, `"line"` renders a transparent, gap-separated line style
+ * @returns The rendered tabs list element
+ */
 function TabsList({
   className,
   variant = "default",
@@ -53,6 +66,14 @@ function TabsList({
   );
 }
 
+/**
+ * Renders a styled tab trigger for use within Tabs and TabsList.
+ *
+ * Accepts and forwards all TabsPrimitive.Tab props.
+ *
+ * @param className - Optional additional class names merged with the component's internal styles
+ * @returns A tab trigger element with `data-slot="tabs-trigger"` and composed styling suitable for horizontal/vertical and varianted tab lists
+ */
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
@@ -69,6 +90,13 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   );
 }
 
+/**
+ * Renders a tab panel container for tabbed content.
+ *
+ * Applies default sizing and typography classes and merges any provided `className`.
+ *
+ * @returns The tab panel element that displays the content for a single tab
+ */
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel

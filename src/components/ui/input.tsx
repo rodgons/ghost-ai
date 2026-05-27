@@ -3,6 +3,13 @@ import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Renders a styled input by wrapping the `@base-ui/react/input` primitive, merging default Tailwind classes with any provided `className`, and forwarding remaining input props.
+ *
+ * @param className - Additional CSS class names to merge with the component's default styling
+ * @param type - HTML `type` attribute to apply to the underlying input element
+ * @returns A React element for a styled input with merged classes and all other props forwarded
+ */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <InputPrimitive

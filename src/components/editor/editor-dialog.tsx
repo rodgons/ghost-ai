@@ -10,6 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+/**
+ * Render a DialogContent element pre-styled for use as an editor dialog shell.
+ *
+ * @param className - Additional CSS class names to merge with the component's default styling
+ * @param props - Remaining props forwarded to `DialogContent`
+ * @returns A `DialogContent` element with editor dialog shell styling applied
+ */
 export function EditorDialogShell({
   className,
   ...props
@@ -25,6 +32,13 @@ export function EditorDialogShell({
   );
 }
 
+/**
+ * Renders a styled header container for an editor dialog.
+ *
+ * Accepts standard `div` props; the provided `className` is combined with the component's default header classes.
+ *
+ * @returns A `div` element that serves as the dialog header with editor-specific spacing and padding.
+ */
 export function EditorDialogHeader({
   className,
   ...props
@@ -37,6 +51,12 @@ export function EditorDialogHeader({
   );
 }
 
+/**
+ * Renders the editor dialog body container with consistent horizontal and vertical padding.
+ *
+ * @param className - Additional CSS class names to merge with the default padding classes
+ * @returns The rendered `div` element used as the dialog body
+ */
 export function EditorDialogBody({
   className,
   ...props
@@ -44,6 +64,13 @@ export function EditorDialogBody({
   return <div className={cn("px-5 py-4", className)} {...props} />;
 }
 
+/**
+ * Renders a styled footer container for an editor dialog.
+ *
+ * Applies footer layout (right-aligned controls with spacing), a top border, muted background, and padding; merges any provided `className` and forwards remaining `div` props to the element.
+ *
+ * @returns The footer DOM element for an editor dialog.
+ */
 export function EditorDialogFooter({
   className,
   ...props
