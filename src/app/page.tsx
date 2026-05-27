@@ -1,15 +1,14 @@
-import { Button } from "@/components/ui/button";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-/**
- * Renders the home page layout with a centered title and test button.
- *
- * @returns The JSX element for the home page: a full-height, centered container with the text `"ghost AI"` and a `Button` labeled `"Test"`.
- */
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center gap-4 bg-background text-foreground">
-      <div>ghost AI</div>
-      <Button>Test</Button>
-    </div>
-  );
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const { userId } = await auth();
+
+  if (userId) {
+    redirect("/editor");
+  }
+
+  redirect("/sign-in");
 }

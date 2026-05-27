@@ -8,21 +8,23 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Build the shared editor shell foundation and dialog styling primitives.
+- Complete Clerk auth wiring across the app with protected routes, dedicated auth pages, and editor account controls.
 
 ## Completed
 
 - Editor navbar refactored to controlled sidebar state with extensible layout regions.
 - Floating project sidebar implemented with transitions, tabs, placeholder states, and footer action.
 - Shared editor dialog styling foundation added.
+- Integrated Clerk authentication into Next.js App Router (proxy middleware and provider).
+- Added dedicated sign-in and sign-up routes, protected editor workspace, and Clerk user account controls.
 
 ## In Progress
 
-- Validate the new editor shell components with lint and type checks.
+- Validate Clerk route protection, auth page styling, and production build behavior.
 
 ## Next Up
 
-- Integrate the editor shell into chapter-level layouts as needed.
+- Run lint, formatting, and production build checks.
 
 ## Open Questions
 

@@ -52,9 +52,9 @@ export function EditorNavbar({
             className="border border-border/60 bg-background/60 text-foreground hover:bg-muted"
           >
             {sidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
+              <PanelLeftClose className="h-4 w-4" suppressHydrationWarning />
             ) : (
-              <PanelLeftOpen className="h-4 w-4" />
+              <PanelLeftOpen className="h-4 w-4" suppressHydrationWarning />
             )}
             <span className="sr-only">
               {sidebarOpen ? "Close sidebar" : "Open sidebar"}
