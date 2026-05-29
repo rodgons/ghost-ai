@@ -1,15 +1,45 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
+import { Plus } from "lucide-react";
+import {
+  CreateProjectDialog,
+  DeleteProjectDialog,
+  RenameProjectDialog,
+} from "@/components/editor/dialogs";
 import { EditorProvider, useEditor } from "@/components/editor/editor-context";
 import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
+import { useProjectDialogs } from "@/hooks/use-project-dialogs";
+
+function EditorHome({ openCreateDialog }: { openCreateDialog: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center">
+      <h1 className="text-2xl font-semibold text-foreground">
+        Create a project or open an existing one
+      </h1>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+        Start a new architecture workspace, or choose a project from the
+        sidebar.
+      </p>
+      <button
+        type="button"
+        onClick={openCreateDialog}
+        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-elevated"
+      >
+        <Plus className="h-4 w-4" />
+        New Project
+      </button>
+    </div>
+  );
+}
 
 function EditorWorkspace() {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useEditor();
+  const dialogs = useProjectDialogs();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-base text-primary">
       <EditorNavbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
@@ -24,23 +54,28 @@ function EditorWorkspace() {
         <ProjectSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          dialogs={dialogs}
         />
 
         <main className="min-h-[calc(100vh-3.5rem)] flex-1 p-6">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-primary">
-              Workspace
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-foreground">
-              Editor
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Protected editor workspace. Your account controls and profile menu
-              are available from the top-right user menu.
-            </p>
-          </div>
+          <EditorHome openCreateDialog={dialogs.openCreateDialog} />
         </main>
       </div>
+
+      <CreateProjectDialog
+        open={dialogs.isCreateDialogOpen}
+        onOpenChange={dialogs.closeCreateDialog}
+      />
+      <RenameProjectDialog
+        open={dialogs.isRenameDialogOpen}
+        onOpenChange={dialogs.closeRenameDialog}
+        project={dialogs.selectedProject}
+      />
+      <DeleteProjectDialog
+        open={dialogs.isDeleteDialogOpen}
+        onOpenChange={dialogs.closeDeleteDialog}
+        project={dialogs.selectedProject}
+      />
     </div>
   );
 }
