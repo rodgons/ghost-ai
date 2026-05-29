@@ -12,9 +12,7 @@ import { EditorNavbar } from "@/components/editor/editor-navbar";
 import { ProjectSidebar } from "@/components/editor/project-sidebar";
 import { useProjectDialogs } from "@/hooks/use-project-dialogs";
 
-function EditorHome() {
-  const { openCreateDialog } = useProjectDialogs();
-
+function EditorHome({ openCreateDialog }: { openCreateDialog: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center text-center">
       <h1 className="text-2xl font-semibold text-foreground">
@@ -60,7 +58,7 @@ function EditorWorkspace() {
         />
 
         <main className="min-h-[calc(100vh-3.5rem)] flex-1 p-6">
-          <EditorHome />
+          <EditorHome openCreateDialog={dialogs.openCreateDialog} />
         </main>
       </div>
 
