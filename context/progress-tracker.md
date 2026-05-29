@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Complete Clerk auth wiring across the app with protected routes, dedicated auth pages, and editor account controls.
+- Build `/editor` home screen with project dialogs and sidebar actions.
 
 ## Completed
 
@@ -20,7 +20,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## In Progress
 
-- Validate Clerk route protection, auth page styling, and production build behavior.
+- Build editor home screen with create project dialog.
+- Implement rename and delete project dialogs.
+- Wire sidebar project actions (rename, delete) to dialogs.
+- Add mobile sidebar behavior with backdrop scrim.
+- Create project dialogs hook for state management.
 
 ## Next Up
 
