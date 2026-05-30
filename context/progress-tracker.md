@@ -1,46 +1,10 @@
-# Progress Tracker
-
-Update this file whenever the current phase, active feature, or implementation state changes.
-
-## Current Phase
-
-- In progress
-
-## Current Goal
-
-- Build `/editor` home screen with project dialogs and sidebar actions (sidebar open by default).
-- Add Prisma Project and ProjectCollaborator models and client singleton.
-
-
-## Completed
-
-- Editor navbar refactored to controlled sidebar state with extensible layout regions.
-- Floating project sidebar implemented with transitions, tabs, placeholder states, and footer action.
-- Shared editor dialog styling foundation added.
-- Integrated Clerk authentication into Next.js App Router (proxy middleware and provider).
-- Added dedicated sign-in and sign-up routes, protected editor workspace, and Clerk user account controls.
-- Project API routes (list, create, rename, delete) implemented with Clerk authentication.
-
-## In Progress
-
-- Build editor home screen with create project dialog.
-- Implement rename and delete project dialogs.
-- Wire sidebar project actions (rename, delete) to dialogs.
-- Add mobile sidebar behavior with backdrop scrim.
-- Create project dialogs hook for state management.
-
-## Next Up
-
-- Run lint, formatting, and production build checks.
-
-## Open Questions
-
-- Add unresolved product or implementation questions here.
-
-## Architecture Decisions
-
-- Add decisions that affect the system design or data model.
-
-## Session Notes
-
-- Add context needed to resume work in the next session.
+- Workspace shell `/editor/[roomId]` built with access checks and layout.
+- Fixed Prisma client initialization in `src/lib/prisma.ts` by aliasing it to the root `lib/prisma.ts` adapter-based client.
+- Fixed the dropdown menu wrapper to use the installed Base UI menu namespace exports and popup composition.
+- Added the required Base UI `Menu.Portal` wrapper around dropdown menu positioner content.
+- Updated project access identity lookup to use Clerk v7 `clerkClient().users.getUser`.
+- Excluded local `.agents` skill files from Biome formatting to keep project checks scoped to app files.
+- Fixed project sidebar actions in the editor workspace by wiring rename/delete dialogs on project routes.
+- Added active project highlighting and project navigation links in the sidebar for `/editor/[roomId]`.
+- Restored the shared editor header on project workspace routes by moving the navbar above the sidebar/canvas layout.
+- Verified with `pnpm format` and `pnpm lint`.

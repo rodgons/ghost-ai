@@ -1,20 +1,42 @@
 "use client";
 
-import { FolderKanban, MoreVertical, Plus, X } from "lucide-react";
+import { FolderKanban, MoreVertical, Pen, Plus, Trash2, X } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+
+interface ProjectSummary {
+  id: string;
+  name: string;
+}
+
+interface ProjectDialogTarget extends ProjectSummary {
+  isOwned: boolean;
+}
+
+interface ProjectDialogControls {
+  openCreateDialog: () => void;
+  openRenameDialog: (project: ProjectDialogTarget) => void;
+  openDeleteDialog: (project: ProjectDialogTarget) => void;
+}
 
 interface ProjectSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   id?: string;
-  dialogs?: ProjectDialogsState;
-  ownedProjects: Array<{ id: string; name: string }>;
-  sharedProjects: Array<{ id: string; name: string }>;
+  dialogs?: ProjectDialogControls;
+  activeProjectId?: string;
+  ownedProjects: ProjectSummary[];
+  sharedProjects: ProjectSummary[];
 }
 
 /**
@@ -32,6 +54,7 @@ export function ProjectSidebar({
   onClose,
   id = "editor-project-sidebar",
   dialogs,
+  activeProjectId,
   ownedProjects,
   sharedProjects,
 }: ProjectSidebarProps) {
@@ -136,6 +159,7 @@ export function ProjectSidebar({
                           key={project.id}
                           project={project}
                           isOwned
+                          isActive={project.id === activeProjectId}
                           onRename={() =>
                             dialogs?.openRenameDialog({
                               ...project,
@@ -172,6 +196,7 @@ export function ProjectSidebar({
                           key={project.id}
                           project={project}
                           isOwned={false}
+                          isActive={project.id === activeProjectId}
                           onRename={() => {}}
                           onDelete={() => {}}
                         />
@@ -229,38 +254,63 @@ function EmptyState({
 interface ProjectItemProps {
   project: { id: string; name: string };
   isOwned: boolean;
+  isActive: boolean;
   onRename: () => void;
   onDelete: () => void;
 }
 function ProjectItem({
   project,
   isOwned,
-  onRename: _onRename,
-  onDelete: _onDelete,
+  isActive,
+  onRename,
+  onDelete,
 }: ProjectItemProps) {
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  // Suppress unused param warnings
-  void _onRename;
-  void _onDelete;
-
   // Simplified UI: show name and optional actions button
   return (
-    <div className="group flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2.5 transition-colors hover:bg-elevated">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-foreground">
+    <div
+      className={cn(
+        "group flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors hover:bg-elevated",
+        isActive
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border bg-surface text-foreground",
+      )}
+    >
+      <Link
+        href={`/editor/${project.id}`}
+        aria-current={isActive ? "page" : undefined}
+        className="min-w-0 flex-1"
+      >
+        <p
+          className={cn(
+            "truncate text-sm font-medium",
+            isActive ? "text-primary" : "text-foreground",
+          )}
+        >
           {project.name}
         </p>
-      </div>
+      </Link>
       {isOwned && (
-        <Button
-          ref={triggerRef}
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Project actions"
-          onClick={() => {}}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Project actions for ${project.name ?? "project"}`}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onRename}>
+              <Pen className="mr-2 h-4 w-4" />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
