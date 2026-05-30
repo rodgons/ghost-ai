@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreate: (name: string) => Promise<void>;
 }
 
 function slugify(text: string): string {
@@ -29,22 +30,31 @@ function slugify(text: string): string {
 export function CreateProjectDialog({
   open,
   onOpenChange,
+  onCreate,
 }: CreateProjectDialogProps) {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const slug = slugify(name);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     setIsLoading(true);
-    // TODO: Implement actual project creation
-    console.log("Creating project:", { name, slug });
-    setIsLoading(false);
-    onOpenChange(false);
-    setName("");
+    try {
+      await onCreate(name.trim());
+      // Close dialog and reset form on success
+      onOpenChange(false);
+      setName("");
+      setError(null);
+    } catch (err) {
+      // Preserve dialog state and show error
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -74,6 +84,7 @@ export function CreateProjectDialog({
                 autoFocus
                 disabled={isLoading}
               />
+              {error && <p className="mt-1 text-sm text-error">{error}</p>}
             </div>
 
             {name && (

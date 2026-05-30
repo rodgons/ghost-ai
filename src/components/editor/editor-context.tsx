@@ -17,7 +17,7 @@ const EditorContext = createContext<EditorContextType | undefined>(undefined);
  * @returns A React provider element that supplies `sidebarOpen`, `setSidebarOpen`, and `toggleSidebar` to descendant components via `EditorContext`
  */
 export function EditorProvider({ children }: { children: ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 

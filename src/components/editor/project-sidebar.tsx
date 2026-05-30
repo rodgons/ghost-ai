@@ -21,6 +21,8 @@ interface ProjectSidebarProps {
   onClose: () => void;
   id?: string;
   dialogs?: ProjectDialogsState;
+  ownedProjects: Array<{ id: string; name: string; slug: string }>;
+  sharedProjects: Array<{ id: string; name: string; slug: string }>;
 }
 
 /**
@@ -38,16 +40,10 @@ export function ProjectSidebar({
   onClose,
   id = "editor-project-sidebar",
   dialogs,
+  ownedProjects,
+  sharedProjects,
 }: ProjectSidebarProps) {
-  // Mock project data
-  const ownedProjects: Array<{ id: string; name: string; slug: string }> = [
-    { id: "1", name: "E-commerce Platform", slug: "e-commerce-platform" },
-    { id: "2", name: "API Gateway", slug: "api-gateway" },
-  ];
-
-  const sharedProjects: Array<{ id: string; name: string; slug: string }> = [
-    { id: "3", name: "Team Dashboard", slug: "team-dashboard" },
-  ];
+  // Projects are passed in as props
 
   const handleCreateClick = () => {
     dialogs?.openCreateDialog();

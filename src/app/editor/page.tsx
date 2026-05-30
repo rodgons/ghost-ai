@@ -1,89 +1,25 @@
-"use client";
+import { auth } from "@clerk/nextjs/server";
+import { EditorClient } from "~/components/editor/editor-client";
+import { EditorProvider } from "~/components/editor/editor-context";
+import prismaClient from "../../../lib/prisma";
 
-import { UserButton } from "@clerk/nextjs";
-import { Plus } from "lucide-react";
-import {
-  CreateProjectDialog,
-  DeleteProjectDialog,
-  RenameProjectDialog,
-} from "@/components/editor/dialogs";
-import { EditorProvider, useEditor } from "@/components/editor/editor-context";
-import { EditorNavbar } from "@/components/editor/editor-navbar";
-import { ProjectSidebar } from "@/components/editor/project-sidebar";
-import { useProjectDialogs } from "@/hooks/use-project-dialogs";
+export default async function EditorPage() {
+  // Server‑side fetch of owned projects using Prisma and Clerk auth
+  const { userId } = await auth();
+  const ownedProjects = userId
+    ? await prismaClient.project.findMany({
+        where: { ownerId: userId },
+        select: { id: true, name: true },
+      })
+    : [];
+  const sharedProjects: Array<{ id: string; name: string }> = [];
 
-function EditorHome({ openCreateDialog }: { openCreateDialog: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center text-center">
-      <h1 className="text-2xl font-semibold text-foreground">
-        Create a project or open an existing one
-      </h1>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        Start a new architecture workspace, or choose a project from the
-        sidebar.
-      </p>
-      <button
-        type="button"
-        onClick={openCreateDialog}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-elevated"
-      >
-        <Plus className="h-4 w-4" />
-        New Project
-      </button>
-    </div>
-  );
-}
-
-function EditorWorkspace() {
-  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useEditor();
-  const dialogs = useProjectDialogs();
-
-  return (
-    <div className="min-h-screen bg-base text-primary">
-      <EditorNavbar
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={toggleSidebar}
-        rightSection={
-          <div className="flex items-center gap-2">
-            <UserButton />
-          </div>
-        }
-      />
-
-      <div className="flex pt-14">
-        <ProjectSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          dialogs={dialogs}
-        />
-
-        <main className="min-h-[calc(100vh-3.5rem)] flex-1 p-6">
-          <EditorHome openCreateDialog={dialogs.openCreateDialog} />
-        </main>
-      </div>
-
-      <CreateProjectDialog
-        open={dialogs.isCreateDialogOpen}
-        onOpenChange={dialogs.closeCreateDialog}
-      />
-      <RenameProjectDialog
-        open={dialogs.isRenameDialogOpen}
-        onOpenChange={dialogs.closeRenameDialog}
-        project={dialogs.selectedProject}
-      />
-      <DeleteProjectDialog
-        open={dialogs.isDeleteDialogOpen}
-        onOpenChange={dialogs.closeDeleteDialog}
-        project={dialogs.selectedProject}
-      />
-    </div>
-  );
-}
-
-export default function EditorPage() {
   return (
     <EditorProvider>
-      <EditorWorkspace />
+      <EditorClient
+        ownedProjects={ownedProjects}
+        sharedProjects={sharedProjects}
+      />
     </EditorProvider>
   );
 }
