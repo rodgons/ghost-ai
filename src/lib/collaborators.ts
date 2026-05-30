@@ -68,9 +68,7 @@ export async function enrichCollaborators(
 
         for (const user of users.data) {
           for (const emailAddress of user.emailAddresses) {
-            const email = normalizeCollaboratorEmail(
-              emailAddress.emailAddress,
-            );
+            const email = normalizeCollaboratorEmail(emailAddress.emailAddress);
             if (!emails.includes(email)) continue;
 
             clerkUsersByEmail.set(email, {
