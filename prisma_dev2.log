@@ -1,0 +1,16 @@
+Loaded Prisma config from prisma.config.ts.
+
+[36m⠋[39m  Starting _prisma dev_ server default...
+
+
+
+
+
+
+[33m⚠[39m  Skipped! 😌
+
+   Your _prisma dev_ server default is already running and listening on ports 51213-51215.
+        
+   To start a different server, use the -n/--name flag with another name.
+
+
