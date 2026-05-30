@@ -18,23 +18,26 @@ interface DeleteProjectDialogProps {
     id: string;
     name: string;
   } | null;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export function DeleteProjectDialog({
   open,
   onOpenChange,
   project,
+  onDelete,
 }: DeleteProjectDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
     if (!project) return;
-
     setIsLoading(true);
-    // TODO: Implement actual project deletion
-    console.log("Deleting project:", project.id);
-    setIsLoading(false);
-    onOpenChange(false);
+    try {
+      await onDelete(project.id);
+    } finally {
+      setIsLoading(false);
+      onOpenChange(false);
+    }
   };
 
   return (
