@@ -8,3 +8,6 @@
 - Added active project highlighting and project navigation links in the sidebar for `/editor/[roomId]`.
 - Restored the shared editor header on project workspace routes by moving the navbar above the sidebar/canvas layout.
 - Verified with `pnpm format` and `pnpm lint`.
+- Implemented `context/feature-specs/09-share-dialog.md` with owner-managed collaborator sharing, read-only collaborator access, Clerk-enriched collaborator display data, project link copy feedback, and editor workspace wiring.
+- Added collaborator API routes for listing, inviting, and removing collaborators with server-side ownership enforcement for mutations.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
