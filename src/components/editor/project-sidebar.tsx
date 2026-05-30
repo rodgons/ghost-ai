@@ -1,19 +1,11 @@
 "use client";
 
-import {
-  FolderKanban,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { FolderKanban, MoreVertical, Plus, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ProjectDialogsState } from "@/hooks/use-project-dialogs";
 import { cn } from "@/lib/utils";
 
 interface ProjectSidebarProps {
@@ -21,8 +13,8 @@ interface ProjectSidebarProps {
   onClose: () => void;
   id?: string;
   dialogs?: ProjectDialogsState;
-  ownedProjects: Array<{ id: string; name: string; slug: string }>;
-  sharedProjects: Array<{ id: string; name: string; slug: string }>;
+  ownedProjects: Array<{ id: string; name: string }>;
+  sharedProjects: Array<{ id: string; name: string }>;
 }
 
 /**
@@ -234,123 +226,41 @@ function EmptyState({
     </div>
   );
 }
-
 interface ProjectItemProps {
-  project: { id: string; name: string; slug: string };
+  project: { id: string; name: string };
   isOwned: boolean;
   onRename: () => void;
   onDelete: () => void;
 }
-
 function ProjectItem({
   project,
   isOwned,
-  onRename,
-  onDelete,
+  onRename: _onRename,
+  onDelete: _onDelete,
 }: ProjectItemProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  // Suppress unused param warnings
+  void _onRename;
+  void _onDelete;
 
-  // Close menu on outside click or Escape key
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node)
-      ) {
-        setIsMenuOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsMenuOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleKey);
-    // Focus first menu button when opened
-    const firstBtn = menuRef.current?.querySelector("button");
-    (firstBtn as HTMLElement | null)?.focus();
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKey);
-    };
-  }, [isMenuOpen]);
-
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
-  const handleRename = () => {
-    setIsMenuOpen(false);
-    onRename();
-    triggerRef.current?.focus();
-  };
-
-  const handleDelete = () => {
-    setIsMenuOpen(false);
-    onDelete();
-    triggerRef.current?.focus();
-  };
-
+  // Simplified UI: show name and optional actions button
   return (
     <div className="group flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2.5 transition-colors hover:bg-elevated">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">
           {project.name}
         </p>
-        <p className="truncate text-xs text-muted-foreground">{project.slug}</p>
       </div>
       {isOwned && (
-        <div className="relative">
-          <Button
-            ref={triggerRef}
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Project actions"
-            aria-haspopup="true"
-            aria-expanded={isMenuOpen}
-            aria-controls={`menu-${project.id}`}
-            onClick={toggleMenu}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggleMenu();
-              }
-            }}
-            className="h-7 w-7"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-          {isMenuOpen && (
-            <div
-              ref={menuRef}
-              id={`menu-${project.id}`}
-              className="absolute right-0 top-full z-50 mt-1 min-w-[120px] flex-col rounded-lg border border-border bg-surface py-1 shadow-lg"
-            >
-              <button
-                type="button"
-                onClick={handleRename}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-elevated"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Rename
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-error transition-colors hover:bg-error/10"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
+        <Button
+          ref={triggerRef}
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Project actions"
+          onClick={() => {}}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
       )}
     </div>
   );
