@@ -11,6 +11,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Build `/editor` home screen with project dialogs and sidebar actions.
 - Add Prisma Project and ProjectCollaborator models and client singleton.
 
+
 ## Completed
 
 - Editor navbar refactored to controlled sidebar state with extensible layout regions.
@@ -18,6 +19,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Shared editor dialog styling foundation added.
 - Integrated Clerk authentication into Next.js App Router (proxy middleware and provider).
 - Added dedicated sign-in and sign-up routes, protected editor workspace, and Clerk user account controls.
+- Project API routes (list, create, rename, delete) implemented with Clerk authentication.
 
 ## In Progress
 

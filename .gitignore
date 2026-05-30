@@ -44,3 +44,5 @@ next-env.d.ts
 /.clerk/
 
 /node_modules/@prisma/client/.prisma/client
+
+/src/generated
