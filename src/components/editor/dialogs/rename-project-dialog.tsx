@@ -14,14 +14,9 @@ import { Input } from "@/components/ui/input";
 interface RenameProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
+  project: { id: string; name: string } | null;
   onRename: (id: string, name: string) => Promise<void>;
 }
-
 export function RenameProjectDialog({
   open,
   onOpenChange,

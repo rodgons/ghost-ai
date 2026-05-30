@@ -33,17 +33,15 @@ function EditorHome({ openCreateDialog }: { openCreateDialog: () => void }) {
     </div>
   );
 }
-
 export function EditorClient({
   ownedProjects,
   sharedProjects,
 }: {
-  ownedProjects: Array<{ id: string; name: string; slug: string }>;
-  sharedProjects: Array<{ id: string; name: string; slug: string }>;
+  ownedProjects: Array<{ id: string; name: string }>;
+  sharedProjects: Array<{ id: string; name: string }>;
 }) {
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useEditor();
   const dialogs = useProjectDialogs();
-
   return (
     <div className="min-h-screen bg-base text-primary">
       <EditorNavbar

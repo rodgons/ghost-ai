@@ -6,7 +6,6 @@ import { useState } from "react";
 export interface Project {
   id: string;
   name: string;
-  slug: string;
   isOwned: boolean;
 }
 
@@ -71,6 +70,13 @@ export function useProjectDialogs(): ProjectDialogsState {
       });
       if (!res.ok) throw new Error("Failed to create project");
       const data = await res.json();
+      // Validate response shape before navigation
+      if (
+        !data ||
+        (typeof data.id !== "string" && typeof data.id !== "number")
+      ) {
+        throw new Error("Invalid response from create project");
+      }
       // Assuming workspace URL pattern is /editor/[id]
       router.push(`/editor/${data.id}`);
     } finally {
@@ -103,7 +109,10 @@ export function useProjectDialogs(): ProjectDialogsState {
       });
       if (!res.ok) throw new Error("Failed to delete project");
       // Redirect only if currently viewing the deleted project
-      if (pathname.startsWith(`/editor/${id}`)) {
+      if (
+        pathname === `/editor/${id}` ||
+        pathname.startsWith(`/editor/${id}/`)
+      ) {
         router.push("/editor");
       }
       router.refresh();
