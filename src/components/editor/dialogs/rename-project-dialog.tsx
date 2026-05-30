@@ -14,17 +14,14 @@ import { Input } from "@/components/ui/input";
 interface RenameProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
+  project: { id: string; name: string } | null;
+  onRename: (id: string, name: string) => Promise<void>;
 }
-
 export function RenameProjectDialog({
   open,
   onOpenChange,
   project,
+  onRename,
 }: RenameProjectDialogProps) {
   const [name, setName] = useState(project?.name ?? "");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,12 +33,13 @@ export function RenameProjectDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !project) return;
-
     setIsLoading(true);
-    // TODO: Implement actual project rename
-    console.log("Renaming project:", project.id, name);
-    setIsLoading(false);
-    onOpenChange(false);
+    try {
+      await onRename(project.id, name.trim());
+    } finally {
+      setIsLoading(false);
+      onOpenChange(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

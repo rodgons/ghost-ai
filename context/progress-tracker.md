@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Build `/editor` home screen with project dialogs and sidebar actions.
+- Build `/editor` home screen with project dialogs and sidebar actions (sidebar open by default).
 - Add Prisma Project and ProjectCollaborator models and client singleton.
 
 
