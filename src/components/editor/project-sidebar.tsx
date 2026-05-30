@@ -292,7 +292,11 @@ function ProjectItem({
       {isOwned && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Project actions">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Project actions for ${project.name ?? "project"}`}
+            >
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

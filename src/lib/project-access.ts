@@ -8,8 +8,14 @@ export async function getCurrentClerkIdentity() {
   const { userId } = await auth();
   if (!userId) return null;
   const client = await clerkClient();
-  const clerkUser = await client.users.getUser(userId);
-  const email = clerkUser?.primaryEmailAddress?.emailAddress ?? null;
+  let email: string | null = null;
+  try {
+    const clerkUser = await client.users.getUser(userId);
+    const rawEmail = clerkUser?.primaryEmailAddress?.emailAddress;
+    email = rawEmail ? rawEmail.trim().toLowerCase() : null;
+  } catch {
+    email = null;
+  }
   return { userId, email };
 }
 
@@ -27,7 +33,12 @@ export async function canAccessProject(
   });
   if (!project) return false;
   if (project.ownerId === userId) return true;
-  if (email && project.collaborators.some((c) => c.email === email))
+  if (
+    email &&
+    project.collaborators.some(
+      (c) => c.email.toLowerCase().trim() === email.toLowerCase().trim(),
+    )
+  )
     return true;
   return false;
 }

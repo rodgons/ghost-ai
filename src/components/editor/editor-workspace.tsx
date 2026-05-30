@@ -42,7 +42,13 @@ export function EditorWorkspace({
         centerSection={<span className="font-medium">{projectName}</span>}
         rightSection={
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon-sm" onClick={toggleAiSidebar}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={toggleAiSidebar}
+              aria-label="Toggle AI sidebar"
+              aria-pressed={aiSidebarOpen}
+            >
               <Bot className="h-4 w-4" />
             </Button>
             <Button variant="default" size="sm">
