@@ -7,10 +7,10 @@ import {
   DeleteProjectDialog,
   RenameProjectDialog,
   ShareProjectDialog,
-} from "@/components/editor/dialogs";
-import { Button } from "@/components/ui/button";
-import { useProjectDialogs } from "@/hooks/use-project-dialogs";
-import { cn } from "@/lib/utils";
+} from "~/components/editor/dialogs";
+import { Button } from "~/components/ui/button";
+import { useProjectDialogs } from "~/hooks/use-project-dialogs";
+import { cn } from "~/lib/utils";
 import { EditorNavbar } from "./editor-navbar";
 import { ProjectSidebar } from "./project-sidebar";
 

@@ -21,8 +21,10 @@ export default function AccessDenied() {
       <p className="text-muted-foreground">
         You don’t have permission to view this project.
       </p>
-      <Link href="/editor" legacyBehavior>
-        <Button variant="default">Back to Projects</Button>
+      <Link href="/editor">
+        <Button asChild variant="default">
+          <a href="/editor">Back to Projects</a>
+        </Button>
       </Link>
     </div>
   );

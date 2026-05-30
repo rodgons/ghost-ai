@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import {
   enrichCollaborators,
   errorResponse,
@@ -94,6 +94,19 @@ export async function POST(
 
   if (!email || !isValidCollaboratorEmail(email)) {
     return errorResponse("A valid collaborator email is required.", 400);
+  }
+
+  const clerk = await clerkClient();
+  const owner = await clerk.users.getUser(project.ownerId);
+  const ownerEmail = owner?.primaryEmailAddress?.emailAddress
+    ? normalizeCollaboratorEmail(owner.primaryEmailAddress.emailAddress)
+    : null;
+
+  if (ownerEmail === email) {
+    return errorResponse(
+      "Project owners cannot be added as collaborators.",
+      400,
+    );
   }
 
   const collaborator = await prisma.projectCollaborator.upsert({

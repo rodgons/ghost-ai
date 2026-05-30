@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { EditorClient } from "@/components/editor/editor-client";
 import { EditorProvider } from "@/components/editor/editor-context";
-import prismaClient from "../../lib/prisma";
+import prismaClient from "~/lib/prisma";
 
 export default async function EditorPage() {
   // Server‑side fetch of owned projects using Prisma and Clerk auth

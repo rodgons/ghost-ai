@@ -52,25 +52,37 @@ export async function enrichCollaborators(
   if (emails.length > 0) {
     try {
       const client = await clerkClient();
-      const users = await client.users.getUserList({
-        emailAddress: emails,
-        limit: emails.length,
-      });
+      const MAX_BATCH_SIZE = 500;
+      const uniqueEmails = Array.from(new Set(emails));
+      const batches: string[][] = [];
 
-      for (const user of users.data) {
-        for (const emailAddress of user.emailAddresses) {
-          const email = normalizeCollaboratorEmail(emailAddress.emailAddress);
-          if (!emails.includes(email)) continue;
+      for (let i = 0; i < uniqueEmails.length; i += MAX_BATCH_SIZE) {
+        batches.push(uniqueEmails.slice(i, i + MAX_BATCH_SIZE));
+      }
 
-          clerkUsersByEmail.set(email, {
-            email,
-            displayName: getDisplayName(user),
-            avatarUrl: user.imageUrl || null,
-          });
+      for (const batch of batches) {
+        const users = await client.users.getUserList({
+          emailAddress: batch,
+          limit: batch.length,
+        });
+
+        for (const user of users.data) {
+          for (const emailAddress of user.emailAddresses) {
+            const email = normalizeCollaboratorEmail(
+              emailAddress.emailAddress,
+            );
+            if (!emails.includes(email)) continue;
+
+            clerkUsersByEmail.set(email, {
+              email,
+              displayName: getDisplayName(user),
+              avatarUrl: user.imageUrl || null,
+            });
+          }
         }
       }
-    } catch {
-      // Clerk enrichment is best-effort; stored collaborator email is canonical.
+    } catch (error) {
+      console.error("Failed to enrich collaborator users:", error);
     }
   }
 
