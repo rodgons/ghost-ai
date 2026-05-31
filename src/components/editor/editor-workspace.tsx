@@ -6,10 +6,11 @@ import {
   CreateProjectDialog,
   DeleteProjectDialog,
   RenameProjectDialog,
-} from "@/components/editor/dialogs";
-import { Button } from "@/components/ui/button";
-import { useProjectDialogs } from "@/hooks/use-project-dialogs";
-import { cn } from "@/lib/utils";
+  ShareProjectDialog,
+} from "~/components/editor/dialogs";
+import { Button } from "~/components/ui/button";
+import { useProjectDialogs } from "~/hooks/use-project-dialogs";
+import { cn } from "~/lib/utils";
 import { EditorNavbar } from "./editor-navbar";
 import { ProjectSidebar } from "./project-sidebar";
 
@@ -29,6 +30,7 @@ export function EditorWorkspace({
 }: WorkspaceProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const dialogs = useProjectDialogs();
 
   const toggleSidebar = () => setSidebarOpen((o) => !o);
@@ -51,7 +53,11 @@ export function EditorWorkspace({
             >
               <Bot className="h-4 w-4" />
             </Button>
-            <Button variant="default" size="sm">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShareDialogOpen(true)}
+            >
               <Share2 className="mr-1 h-4 w-4" />
               Share
             </Button>
@@ -112,6 +118,12 @@ export function EditorWorkspace({
         onOpenChange={dialogs.closeDeleteDialog}
         project={dialogs.selectedProject}
         onDelete={dialogs.deleteProject}
+      />
+      <ShareProjectDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        projectId={projectId}
+        projectName={projectName}
       />
     </div>
   );

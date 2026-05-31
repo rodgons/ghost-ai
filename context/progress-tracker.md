@@ -8,3 +8,21 @@
 - Added active project highlighting and project navigation links in the sidebar for `/editor/[roomId]`.
 - Restored the shared editor header on project workspace routes by moving the navbar above the sidebar/canvas layout.
 - Verified with `pnpm format` and `pnpm lint`.
+- Implemented `context/feature-specs/09-share-dialog.md` with owner-managed collaborator sharing, read-only collaborator access, Clerk-enriched collaborator display data, project link copy feedback, and editor workspace wiring.
+- Added collaborator API routes for listing, inviting, and removing collaborators with server-side ownership enforcement for mutations.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Current goal: implement `context/feature-specs/10-liveblocks-setup.md`.
+- Next steps: configure Liveblocks types, add cached Liveblocks node client and cursor color helper, add `/api/liveblocks-auth`, verify project access in the auth flow, then run format, lint, and build.
+- Resolved: Liveblocks API keys are present in `.env.local`; the server client reads `LIVEBLOCKS_SECRET_KEY` from the environment at runtime.
+- Implemented Liveblocks type configuration for presence and user metadata.
+- Added cached Liveblocks node client creation plus deterministic user cursor color selection in `src/lib/liveblocks.ts`.
+- Added `POST /api/liveblocks-auth` with Clerk authentication, project access verification, private room creation, room-scoped session authorization, and user metadata.
+- Resolved the existing merge conflict in `src/lib/project-access.ts` so access checks can compile.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Fixed the shared Base UI button wrapper to use `render` for `asChild` composition, which removed the React DOM warning from the editor navbar and access-denied button.
+- Current goal: implement `context/feature-specs/11-base-canvas.md`.
+- Added shared canvas node and edge types in `types/canvas.ts`, including node label/color/shape data and the `canvasNode`/`canvasEdge` type identifiers.
+- Added a Liveblocks-backed client canvas wrapper with `/api/liveblocks-auth`, room initialization, null cursor presence, suspense loading UI, and a connection error fallback.
+- Replaced the editor workspace canvas placeholder with the collaborative React Flow canvas using `useLiveblocksFlow`, empty initial nodes/edges, loose connections, `fitView`, `MiniMap`, and a dot background.
+- Updated Liveblocks storage typing for the React Flow room data.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.

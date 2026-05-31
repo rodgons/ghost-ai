@@ -41,7 +41,7 @@ The canvas area should fill the remaining space.
 
 ## Scope
 
-Do not add real canvas logic, Liveblocks, AI chat, or sharing behavior yet.
+UI only: add a share button, but do not implement sharing behavior yet. Do not add real canvas logic, Liveblocks, or AI chat.
 
 ## Check When Done
 

@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import AccessDenied from "@/components/editor/access-denied";
 import { EditorWorkspace } from "@/components/editor/editor-workspace";
+import { normalizeCollaboratorEmail } from "@/lib/collaborators";
 import {
   canAccessProject,
   getCurrentClerkIdentity,
@@ -52,7 +53,9 @@ export default async function EditorRoomPage({
   });
   const sharedProjects = email
     ? await prismaClient.project.findMany({
-        where: { collaborators: { some: { email } } },
+        where: {
+          collaborators: { some: { email: normalizeCollaboratorEmail(email) } },
+        },
         select: { id: true, name: true },
       })
     : [];

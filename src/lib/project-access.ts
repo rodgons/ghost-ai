@@ -1,5 +1,6 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import prismaClient from "../lib/prisma";
+import { normalizeCollaboratorEmail } from "~/lib/collaborators";
+import prismaClient from "~/lib/prisma";
 
 /**
  * Fetch the current Clerk identity: userId and primary email address (if available).
@@ -33,10 +34,12 @@ export async function canAccessProject(
   });
   if (!project) return false;
   if (project.ownerId === userId) return true;
+  const normalizedEmail = email ? normalizeCollaboratorEmail(email) : null;
   if (
-    email &&
+    normalizedEmail &&
     project.collaborators.some(
-      (c) => c.email.toLowerCase().trim() === email.toLowerCase().trim(),
+      (collaborator) =>
+        normalizeCollaboratorEmail(collaborator.email) === normalizedEmail,
     )
   )
     return true;
