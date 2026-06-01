@@ -20,9 +20,65 @@
 - Resolved the existing merge conflict in `src/lib/project-access.ts` so access checks can compile.
 - Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
 - Fixed the shared Base UI button wrapper to use `render` for `asChild` composition, which removed the React DOM warning from the editor navbar and access-denied button.
-- Current goal: implement `context/feature-specs/11-base-canvas.md`.
 - Added shared canvas node and edge types in `types/canvas.ts`, including node label/color/shape data and the `canvasNode`/`canvasEdge` type identifiers.
 - Added a Liveblocks-backed client canvas wrapper with `/api/liveblocks-auth`, room initialization, null cursor presence, suspense loading UI, and a connection error fallback.
 - Replaced the editor workspace canvas placeholder with the collaborative React Flow canvas using `useLiveblocksFlow`, empty initial nodes/edges, loose connections, `fitView`, `MiniMap`, and a dot background.
 - Updated Liveblocks storage typing for the React Flow room data.
 - Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Current goal: implement `context/feature-specs/11-base-canvas.md`.
+- Wired the Liveblocks-backed collaborative React Flow canvas into the editor workspace in place of the canvas placeholder.
+- Cleaned the shared Base UI button wrapper to remove `any` casts while preserving `asChild` render composition.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Current goal: implement `context/feature-specs/12-shape-panel.md`.
+- Added a bottom floating shape toolbar with draggable rectangle, diamond, circle, pill, cylinder, and hexagon buttons.
+- Added typed shape drag payloads with default shape sizes and canvas dragover/drop handling that creates `canvasNode` nodes using the default node color, empty label, dropped shape, timestamp, and counter-based IDs.
+- Added the initial `canvasNode` renderer so newly dropped nodes are visible as simple bordered rectangles with centered labels.
+- Fixed shape panel issues by importing React Flow styles, centering drops under the pointer, explicitly enabling canvas panning on drag, and rendering each supported node shape visually.
+- Current goal: implement `context/feature-specs/13-node-shape.md`.
+- Replaced the placeholder node shape rendering with CSS-backed rectangle/pill/circle shapes and scalable SVG diamond/hexagon/cylinder shapes.
+- Added subtle resting borders with brighter selected borders for custom canvas nodes.
+- Added a cursor-following shape drag preview that uses the same shape type and default size as the drop payload and clears on drop or drag cancellation.
+- Current goal: implement `context/feature-specs/14-node-editing.md`.
+- Added selected-node resize handles with minimum dimensions and dark-canvas styling.
+- Added inline centered label editing on double-click, including empty-label placeholder text, live label updates through React Flow node data, blur/Escape close behavior, and drag/pan prevention while editing.
+- Fixed shape linking by replacing unnamed mixed source/target handles with four named loose-mode source handles, preserving the selected side in new edge endpoints.
+- Updated empty shape labels to render blank by default instead of showing placeholder text.
+- Allowed nodes to be moved by dragging the shape body by removing drag/pan blocking from the non-editing label surface.
+- Updated canvas wheel behavior so Ctrl/Cmd + wheel zooms, plain wheel pans vertically, and Shift + wheel pans horizontally.
+- Replaced always-on edge arrows with a selected-edge toolbar that lets users choose between a normal line and an arrow line per edge.
+- Updated custom canvas edges from straight smooth-step routing to softer curved Bezier paths for a more flowing connection style.
+- Current goal: implement `context/feature-specs/15-nodes-color-toolbar.md`.
+- Added a selected-node floating color toolbar above canvas nodes using React Flow `NodeToolbar`.
+- Wired the toolbar swatches to the predefined `NODE_COLORS` pairs so choosing a swatch updates both node fill and text color through collaborative canvas state with no server calls.
+- Added active swatch styling, tight hover glow, and toolbar interaction guards so swatches do not drag nodes or pan the canvas.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: implement `context/feature-specs/16-edge-behaviour.md`.
+- Replaced custom canvas edges with smooth right-angle routing using `getSmoothStepPath`, rounded light strokes, default arrowheads, dimmed rest state, and brighter hover/selected state.
+- Increased edge interaction width through `BaseEdge` so edges are easier to hover and double-click without increasing visible line thickness.
+- Added inline edge labels through `EdgeLabelRenderer` using the path-provided label coordinates, including double-click editing, grow-to-text inputs, saved pill badges, active empty-label hints, and collaborative `edge.data.label` updates.
+- Preserved four subtle hover-revealed connection handles on every node and made new edges default to the custom canvas edge type with arrowheads and label data.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: implement `context/feature-specs/17-canvas-ergonomics.md`.
+- Added a bottom-left pill control bar above the shape panel with zoom out, fit view, zoom in, undo, and redo controls separated by a divider.
+- Wired zoom controls to the React Flow instance with short animated viewport movement.
+- Wired undo/redo controls to Liveblocks history using `useUndo`, `useRedo`, `useCanUndo`, and `useCanRedo`, including dimmed disabled states.
+- Added `src/hooks/useKeyboardShortcuts.ts` for zoom and undo/redo shortcuts while skipping input, textarea, select, and contenteditable targets.
+- Removed the bottom-right minimap from the canvas.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Added edge reconnection support so existing connection endpoints can be dragged from one node handle to another.
+- Wired React Flow `onReconnect` through `reconnectEdge` and Liveblocks edge replacement changes, preserving the edge id and label data while updating source/target handles.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: implement `context/feature-specs/18-starter-template.md`.
+- Next steps: add static starter template data, build the template import modal with lightweight previews, wire the editor navbar action to the collaborative canvas import flow, then run format, lint, and build.
+- Open questions: none.
+- Added a static starter template library with microservices, CI/CD pipeline, and event-driven order diagrams using shared canvas node and edge types.
+- Added a starter templates dialog with scrollable template cards, fixed-size SVG previews calculated from template node bounds, and per-template import actions.
+- Wired the editor navbar Templates button to replace the current collaborative canvas by deleting existing nodes/edges, adding the selected template through the Liveblocks React Flow change handlers, and fitting the view afterward.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Adjusted the starter templates modal to use a larger dialog, square preview viewports, roomier template cards, and more vertical scroll space.
+- Expanded the starter templates modal horizontally and increased template card height, spacing, and description area for stronger vertical usage.
+- Made the starter templates modal wider and shorter, with a lower max height and more compact template cards.
+- Increased the starter templates modal content width so the template grid can occupy more horizontal space on desktop.
+- Updated node labels to use the node fill color on an accent highlight, with matching highlighted labels in starter template previews.
+- Changed live canvas node labels from accent highlight chips to shape-colored text with a lighter accent outline.
+- Changed node label outlines to use the darker shape fill while label text uses the lighter node color.
