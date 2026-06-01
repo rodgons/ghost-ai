@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, Share2 } from "lucide-react";
+import { Bot, LayoutTemplate, Share2 } from "lucide-react";
 import { useState } from "react";
 import {
   CreateProjectDialog,
@@ -11,8 +11,14 @@ import {
 import { Button } from "~/components/ui/button";
 import { useProjectDialogs } from "~/hooks/use-project-dialogs";
 import { cn } from "~/lib/utils";
+import {
+  type CanvasTemplateImportRequest,
+  CollaborativeCanvas,
+} from "./collaborative-canvas";
 import { EditorNavbar } from "./editor-navbar";
 import { ProjectSidebar } from "./project-sidebar";
+import type { CanvasTemplate } from "./starter-templates";
+import { StarterTemplatesModal } from "./starter-templates-modal";
 
 interface WorkspaceProps {
   ownedProjects: Array<{ id: string; name: string }>;
@@ -31,10 +37,19 @@ export function EditorWorkspace({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
+  const [templateImportRequest, setTemplateImportRequest] =
+    useState<CanvasTemplateImportRequest | null>(null);
   const dialogs = useProjectDialogs();
 
   const toggleSidebar = () => setSidebarOpen((o) => !o);
   const toggleAiSidebar = () => setAiSidebarOpen((o) => !o);
+  const importTemplate = (template: CanvasTemplate) => {
+    setTemplateImportRequest({
+      id: Date.now(),
+      template,
+    });
+  };
 
   return (
     <div className="min-h-screen overflow-hidden bg-base text-primary">
@@ -44,6 +59,14 @@ export function EditorWorkspace({
         centerSection={<span className="font-medium">{projectName}</span>}
         rightSection={
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setTemplatesModalOpen(true)}
+            >
+              <LayoutTemplate className="mr-1 h-4 w-4" />
+              Templates
+            </Button>
             <Button
               variant="ghost"
               size="icon-sm"
@@ -76,10 +99,10 @@ export function EditorWorkspace({
         />
 
         <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
-          {/* Main canvas placeholder */}
-          <main className="flex flex-1 items-center justify-center bg-background">
-            <p className="text-muted-foreground">Canvas coming soon</p>
-          </main>
+          <CollaborativeCanvas
+            roomId={projectId}
+            templateImportRequest={templateImportRequest}
+          />
 
           {/* Right AI sidebar placeholder */}
           {aiSidebarOpen && (
@@ -124,6 +147,11 @@ export function EditorWorkspace({
         onOpenChange={setShareDialogOpen}
         projectId={projectId}
         projectName={projectName}
+      />
+      <StarterTemplatesModal
+        open={templatesModalOpen}
+        onOpenChange={setTemplatesModalOpen}
+        onImport={importTemplate}
       />
     </div>
   );

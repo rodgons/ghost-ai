@@ -64,18 +64,19 @@ function Button({
   ...props
 }: ButtonProps) {
   const shouldUseRender = Boolean(asChild && React.isValidElement(children));
-
-  const ButtonImpl = ButtonPrimitive as any;
+  const renderElement = shouldUseRender
+    ? (children as React.ReactElement)
+    : undefined;
 
   return (
-    <ButtonImpl
+    <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      render={shouldUseRender ? (children as any) : undefined}
+      render={renderElement}
       {...props}
     >
       {shouldUseRender ? undefined : children}
-    </ButtonImpl>
+    </ButtonPrimitive>
   );
 }
 
