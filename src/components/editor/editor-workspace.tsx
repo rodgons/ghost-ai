@@ -64,7 +64,7 @@ export function EditorWorkspace({
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-base text-primary">
+    <div className="min-h-screen overflow-hidden bg-base text-primary-text">
       <EditorNavbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}

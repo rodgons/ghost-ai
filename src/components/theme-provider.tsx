@@ -32,26 +32,39 @@ function applyTheme(theme: Theme) {
   root.classList.toggle("light", theme === "light");
 }
 
+function getInitialTheme(): Theme {
+  if (typeof document === "undefined") {
+    return "dark";
+  }
+
+  return document.documentElement.classList.contains("light")
+    ? "light"
+    : "dark";
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
     const initialTheme = isTheme(storedTheme) ? storedTheme : "dark";
 
     setTheme(initialTheme);
-    applyTheme(initialTheme);
   }, []);
 
+  useEffect(() => {
+    if (!hasHydrated) {
+      setHasHydrated(true);
+      return;
+    }
+
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    applyTheme(theme);
+  }, [hasHydrated, theme]);
+
   const toggleTheme = useCallback(() => {
-    setTheme((currentTheme) => {
-      const nextTheme = currentTheme === "dark" ? "light" : "dark";
-
-      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-      applyTheme(nextTheme);
-
-      return nextTheme;
-    });
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   }, []);
 
   const value = useMemo(

@@ -20,6 +20,7 @@ interface UseCanvasAutosaveOptions {
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SAVED_STATUS_VISIBLE_MS = 2500;
 const ERROR_STATUS_VISIBLE_MS = 2500;
+const EMPTY_SERIALIZED_SNAPSHOT = JSON.stringify({ nodes: [], edges: [] });
 
 export function useCanvasAutosave({
   edges,
@@ -181,8 +182,7 @@ export function useCanvasAutosave({
 
     if (
       !hasInitializedSnapshotRef.current &&
-      nodes.length === 0 &&
-      edges.length === 0
+      serializedSnapshot === EMPTY_SERIALIZED_SNAPSHOT
     ) {
       hasInitializedSnapshotRef.current = true;
       lastSavedSnapshotRef.current = serializedSnapshot;
@@ -205,15 +205,7 @@ export function useCanvasAutosave({
     return () => {
       clearSaveTimeout();
     };
-  }, [
-    clearSaveTimeout,
-    edges.length,
-    enabled,
-    nodes.length,
-    paused,
-    saveSnapshot,
-    serializedSnapshot,
-  ]);
+  }, [clearSaveTimeout, enabled, paused, saveSnapshot, serializedSnapshot]);
 
   useEffect(() => {
     return () => {

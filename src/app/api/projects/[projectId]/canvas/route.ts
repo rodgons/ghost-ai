@@ -1,4 +1,11 @@
-import { BlobPreconditionFailedError, del, get, head, put } from "@vercel/blob";
+import {
+  BlobNotFoundError,
+  BlobPreconditionFailedError,
+  del,
+  get,
+  head,
+  put,
+} from "@vercel/blob";
 import { isCanvasSnapshot } from "@/lib/canvas-snapshot";
 import prisma from "@/lib/prisma";
 import {
@@ -104,22 +111,27 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
 
   let savedBlob: Awaited<ReturnType<typeof put>>;
   const currentCanvasPath = project.canvasJsonPath;
+  let currentCanvasEtag: string | undefined;
 
   try {
     const uploadOptions: Parameters<typeof put>[2] = {
       access: "private",
-      allowOverwrite: true,
       contentType: "application/json",
     };
 
     if (currentCanvasPath) {
-      const metadata = await head(currentCanvasPath);
-
-      uploadOptions.ifMatch = metadata.etag;
+      try {
+        const metadata = await head(currentCanvasPath);
+        currentCanvasEtag = metadata.etag;
+      } catch (error: unknown) {
+        if (!(error instanceof BlobNotFoundError)) {
+          throw error;
+        }
+      }
     }
 
     savedBlob = await put(
-      `canvas/${projectId}.json`,
+      `canvas/${projectId}-${Date.now()}-${crypto.randomUUID()}.json`,
       JSON.stringify(canvas),
       uploadOptions,
     );
@@ -141,11 +153,23 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
       select: { id: true },
     });
   } catch (error: unknown) {
-    if (currentCanvasPath && currentCanvasPath !== savedBlob.url) {
-      await del(savedBlob.url).catch(() => null);
-    }
+    await del(savedBlob.url).catch(() => null);
 
     throw error;
+  }
+
+  if (currentCanvasPath && currentCanvasPath !== savedBlob.url) {
+    await del(
+      currentCanvasPath,
+      currentCanvasEtag ? { ifMatch: currentCanvasEtag } : undefined,
+    ).catch((error: unknown) => {
+      if (
+        error instanceof BlobNotFoundError ||
+        error instanceof BlobPreconditionFailedError
+      ) {
+        return;
+      }
+    });
   }
 
   return Response.json({ canvasJsonPath: savedBlob.url });

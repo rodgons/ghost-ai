@@ -99,7 +99,7 @@
 - Verified the cursor overlay positioning fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Memoized React Flow node and edge type maps inside the synced canvas component to keep stable prop identities and remove the React Flow new `nodeTypes`/`edgeTypes` warning.
 - Verified the React Flow type map warning fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
-- Current goal: implement `context/feature-specs/20-ai-sidear-shell.md`.
+- Current goal: implement `context/feature-specs/20-ai-sidebar-shell.md`.
 - Next steps: extract the AI sidebar into a controlled floating component, add AI Architect and Specs tabs, wire local chat shell interactions, update documented color token mappings if needed, then run format, lint, and build.
 - Open questions: none.
 - Added `AIWorkspaceSidebar` as a controlled floating right-side editor component with header, close button, shadcn tabs, AI Architect chat shell, starter prompt chips, Enter-to-send textarea behavior, and a static Specs tab card.
@@ -147,3 +147,12 @@
 - Open questions: none.
 - Fixed light-mode navbar contrast by adding dark `navbar-bg`, `navbar-border`, `navbar-control`, and `navbar-control-hover` tokens and applying them to the editor navbar controls.
 - Fixed the light-mode navbar title color by restoring `text-navbar-text` on the navbar slots and project title, and removed the sidebar toggle fill in light mode.
+- Current goal: verify and address review comments for feature specs, canvas persistence, AI sidebar accessibility, theme initialization, and autosave dependencies.
+- Renamed the AI sidebar shell feature spec to `20-ai-sidebar-shell.md` and updated the tracked reference.
+- Updated the canvas autosave spec to use `/hooks` and `pnpm run build`.
+- Updated canvas blob saves to write a unique new blob before changing the Prisma pointer, then clean up old/new blobs after DB success/failure.
+- Broadened canvas node color validation to match the current custom-color-capable `NodeColor` type.
+- Added token aliases for existing `bg-base`, `bg-subtle`, and `bg-elevated` classes.
+- Made the closed AI sidebar inert and pointer-inactive.
+- Made theme toggle updates pure and added a before-paint theme initialization script.
+- Removed redundant autosave effect dependencies.

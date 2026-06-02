@@ -21,6 +21,17 @@ export const metadata: Metadata = {
   description: "Secure AI workspace powered by Clerk",
 };
 
+const themeInitScript = `(() => {
+  try {
+    const theme = window.localStorage.getItem("ghost-ai-theme");
+    const nextTheme = theme === "light" || theme === "dark" ? theme : "dark";
+    const root = document.documentElement;
+    root.classList.toggle("dark", nextTheme === "dark");
+    root.classList.toggle("light", nextTheme === "light");
+  } catch {
+  }
+})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +43,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Theme class must be set before first paint.
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+      </head>
       <body className="min-h-full bg-background text-foreground">
         <ClerkProvider
           afterSignOutUrl="/sign-in"

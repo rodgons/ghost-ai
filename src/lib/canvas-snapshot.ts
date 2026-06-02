@@ -2,7 +2,6 @@ import {
   CANVAS_EDGE_TYPE,
   CANVAS_NODE_TYPE,
   type CanvasSnapshot,
-  NODE_COLORS,
   NODE_SHAPES,
   type NodeColor,
   type NodeShape,
@@ -21,8 +20,11 @@ function isNodeColor(value: unknown): value is NodeColor {
     return false;
   }
 
-  return NODE_COLORS.some(
-    (color) => color.fill === value.fill && color.text === value.text,
+  return (
+    typeof value.fill === "string" &&
+    value.fill.trim().length > 0 &&
+    typeof value.text === "string" &&
+    value.text.trim().length > 0
   );
 }
 

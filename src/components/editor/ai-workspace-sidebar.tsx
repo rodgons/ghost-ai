@@ -242,11 +242,12 @@ export function AIWorkspaceSidebar({
       <aside
         aria-label="AI workspace sidebar"
         aria-hidden={!isOpen}
+        inert={!isOpen}
         className={cn(
-          "pointer-events-auto mr-4 flex h-[calc(100vh-5rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col rounded-3xl border border-surface-border bg-base/95 p-4 text-copy-primary shadow-2xl backdrop-blur transition-all duration-300 ease-out",
+          "mr-4 flex h-[calc(100vh-5rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col rounded-3xl border border-surface-border bg-base/95 p-4 text-copy-primary shadow-2xl backdrop-blur transition-all duration-300 ease-out",
           isOpen
-            ? "translate-x-0 opacity-100"
-            : "translate-x-[calc(100%+1rem)] opacity-0",
+            ? "pointer-events-auto translate-x-0 opacity-100"
+            : "pointer-events-none translate-x-[calc(100%+1rem)] opacity-0",
         )}
       >
         <div className="flex items-start gap-3 border-b border-surface-border pb-4">
