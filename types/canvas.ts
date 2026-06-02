@@ -23,8 +23,39 @@ export const NODE_COLORS = [
   { fill: "#062822", text: "#0AC7B4" },
 ] as const;
 
+export const LIGHT_NODE_COLORS = [
+  { fill: "#F8FAFC", text: "#1F2937" },
+  { fill: "#EAF4FF", text: "#1268B3" },
+  { fill: "#F4ECFF", text: "#7E35B8" },
+  { fill: "#FFF3E0", text: "#B65E00" },
+  { fill: "#FFECEC", text: "#C8353A" },
+  { fill: "#FFEAF2", text: "#C73667" },
+  { fill: "#EAF8EE", text: "#287D3C" },
+  { fill: "#E5FBF8", text: "#067B70" },
+] as const;
+
 export type NodeShape = (typeof NODE_SHAPES)[number];
-export type NodeColor = (typeof NODE_COLORS)[number];
+export type NodeColor = {
+  fill: string;
+  text: string;
+};
+export type CanvasTheme = "dark" | "light";
+
+export function getThemedNodeColor(
+  color: NodeColor,
+  theme: CanvasTheme,
+): NodeColor {
+  if (theme === "dark") {
+    return color;
+  }
+
+  const colorIndex = NODE_COLORS.findIndex(
+    (candidate) =>
+      candidate.fill === color.fill && candidate.text === color.text,
+  );
+
+  return colorIndex >= 0 ? LIGHT_NODE_COLORS[colorIndex] : color;
+}
 
 export interface CanvasNodeData extends Record<string, unknown> {
   label: string;
@@ -38,3 +69,8 @@ export interface CanvasEdgeData extends Record<string, unknown> {
 
 export type CanvasNode = Node<CanvasNodeData, typeof CANVAS_NODE_TYPE>;
 export type CanvasEdge = Edge<CanvasEdgeData, typeof CANVAS_EDGE_TYPE>;
+
+export interface CanvasSnapshot {
+  edges: CanvasEdge[];
+  nodes: CanvasNode[];
+}
