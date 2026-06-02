@@ -1,4 +1,4 @@
-import { get, put } from "@vercel/blob";
+import { BlobPreconditionFailedError, del, get, head, put } from "@vercel/blob";
 import { isCanvasSnapshot } from "@/lib/canvas-snapshot";
 import prisma from "@/lib/prisma";
 import {
@@ -89,7 +89,7 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true },
+    select: { id: true, canvasJsonPath: true },
   });
 
   if (!project) {
@@ -102,17 +102,51 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
     return Response.json({ error: "Invalid canvas JSON." }, { status: 400 });
   }
 
-  const blob = await put(`canvas/${projectId}.json`, JSON.stringify(canvas), {
-    access: "private",
-    allowOverwrite: true,
-    contentType: "application/json",
-  });
+  let savedBlob: Awaited<ReturnType<typeof put>>;
+  const currentCanvasPath = project.canvasJsonPath;
 
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { canvasJsonPath: blob.url },
-    select: { id: true },
-  });
+  try {
+    const uploadOptions: Parameters<typeof put>[2] = {
+      access: "private",
+      allowOverwrite: true,
+      contentType: "application/json",
+    };
 
-  return Response.json({ canvasJsonPath: blob.url });
+    if (currentCanvasPath) {
+      const metadata = await head(currentCanvasPath);
+
+      uploadOptions.ifMatch = metadata.etag;
+    }
+
+    savedBlob = await put(
+      `canvas/${projectId}.json`,
+      JSON.stringify(canvas),
+      uploadOptions,
+    );
+  } catch (error: unknown) {
+    if (error instanceof BlobPreconditionFailedError) {
+      return Response.json(
+        { error: "Canvas save conflict. Please retry." },
+        { status: 409 },
+      );
+    }
+
+    throw error;
+  }
+
+  try {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { canvasJsonPath: savedBlob.url },
+      select: { id: true },
+    });
+  } catch (error: unknown) {
+    if (currentCanvasPath && currentCanvasPath !== savedBlob.url) {
+      await del(savedBlob.url).catch(() => null);
+    }
+
+    throw error;
+  }
+
+  return Response.json({ canvasJsonPath: savedBlob.url });
 }

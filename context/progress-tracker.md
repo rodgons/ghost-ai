@@ -141,3 +141,9 @@
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: wire AI generation against the persisted canvas once the generation spec is active.
 - Open questions: none.
+- Current goal: keep editor navbar text white across light and dark themes.
+- Added a semantic `navbar-text` color token and applied it to editor navbar text, icon buttons, and navbar actions.
+- Next steps: run `pnpm format` and `pnpm lint`.
+- Open questions: none.
+- Fixed light-mode navbar contrast by adding dark `navbar-bg`, `navbar-border`, `navbar-control`, and `navbar-control-hover` tokens and applying them to the editor navbar controls.
+- Fixed the light-mode navbar title color by restoring `text-navbar-text` on the navbar slots and project title, and removed the sidebar toggle fill in light mode.

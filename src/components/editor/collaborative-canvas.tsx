@@ -119,7 +119,7 @@ interface ShapeOption extends ShapeDragPayload {
 interface CollaboratorPresence {
   avatarUrl: string;
   connectionId: number;
-  cursor: { x: number; y: number } | null;
+  cursor: { flowX: number; flowY: number } | null;
   cursorColor: string;
   displayName: string;
 }
@@ -858,16 +858,23 @@ function PresenceAvatarGroup() {
 }
 
 function LiveCursor({ participant }: { participant: CollaboratorPresence }) {
+  const { flowToScreenPosition } = useReactFlow();
+
   if (!participant.cursor) {
     return null;
   }
+
+  const screenPosition = flowToScreenPosition({
+    x: participant.cursor.flowX,
+    y: participant.cursor.flowY,
+  });
 
   return (
     <div
       className="absolute left-0 top-0 flex items-start"
       style={{
         color: participant.cursorColor,
-        transform: `translate(${participant.cursor.x}px, ${participant.cursor.y}px)`,
+        transform: `translate(${screenPosition.x}px, ${screenPosition.y}px)`,
       }}
     >
       <svg
@@ -1222,14 +1229,19 @@ function SyncedCanvas({
         return;
       }
 
+      const flowPosition = screenToFlowPosition({
+        x: clientX,
+        y: clientY,
+      });
+
       updateMyPresence({
         cursor: {
-          x: clientX - bounds.left,
-          y: clientY - bounds.top,
+          flowX: flowPosition.x,
+          flowY: flowPosition.y,
         },
       });
     },
-    [updateMyPresence],
+    [screenToFlowPosition, updateMyPresence],
   );
 
   const handleDragOver = useCallback(

@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
 
 @theme inline {
   --font-heading: var(--font-geist-sans);
@@ -48,6 +49,11 @@
   --color-muted-text: var(--text-muted);
   --color-copy-primary: var(--text-primary);
   --color-copy-muted: var(--text-muted);
+  --color-navbar-bg: var(--navbar-bg);
+  --color-navbar-border: var(--navbar-border);
+  --color-navbar-control: var(--navbar-control);
+  --color-navbar-control-hover: var(--navbar-control-hover);
+  --color-navbar-text: var(--navbar-text);
   --color-brand: var(--accent-primary);
   --color-brand-dim: var(--accent-primary-dim);
   --color-accent-text: var(--accent-ai-text);
@@ -104,6 +110,11 @@
   --text-secondary: #454b57;
   --text-muted: #697283;
   --text-faint: #9aa3b1;
+  --navbar-bg: rgba(17, 17, 20, 0.96);
+  --navbar-border: rgba(42, 42, 48, 0.9);
+  --navbar-control: rgba(24, 24, 28, 0.88);
+  --navbar-control-hover: rgba(30, 30, 35, 0.96);
+  --navbar-text: #ffffff;
   --accent-primary: #00c8d4;
   --accent-primary-dim: rgba(0, 200, 212, 0.16);
   --accent-ai: #6457f9;
@@ -156,6 +167,11 @@
   --text-secondary: #c0c0cc;
   --text-muted: #808090;
   --text-faint: #505060;
+  --navbar-bg: rgba(17, 17, 20, 0.96);
+  --navbar-border: rgba(42, 42, 48, 0.9);
+  --navbar-control: rgba(24, 24, 28, 0.88);
+  --navbar-control-hover: rgba(30, 30, 35, 0.96);
+  --navbar-text: #ffffff;
   --accent-primary: #00c8d4;
   --accent-primary-dim: rgba(0, 200, 212, 0.12);
   --accent-ai: #6457f9;

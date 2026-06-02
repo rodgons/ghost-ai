@@ -68,7 +68,9 @@ export function EditorWorkspace({
       <EditorNavbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
-        centerSection={<span className="font-medium">{projectName}</span>}
+        centerSection={
+          <span className="font-medium text-navbar-text">{projectName}</span>
+        }
         rightSection={
           <div className="flex items-center gap-2">
             <Button
@@ -82,7 +84,7 @@ export function EditorWorkspace({
               className={
                 canvasSaveStatus === "error"
                   ? "border-destructive/50 text-destructive"
-                  : "text-copy-primary"
+                  : "border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
               }
             >
               <Save className="mr-1 h-4 w-4" />
@@ -92,7 +94,7 @@ export function EditorWorkspace({
               variant="outline"
               size="sm"
               onClick={() => setTemplatesModalOpen(true)}
-              className="text-copy-primary"
+              className="border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
             >
               <LayoutTemplate className="mr-1 h-4 w-4" />
               Templates
@@ -103,7 +105,7 @@ export function EditorWorkspace({
               onClick={toggleAiSidebar}
               aria-label="Toggle AI sidebar"
               aria-pressed={aiSidebarOpen}
-              className="text-copy-primary"
+              className="text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
             >
               <Bot className="h-4 w-4" />
             </Button>
@@ -111,7 +113,7 @@ export function EditorWorkspace({
               variant="default"
               size="sm"
               onClick={() => setShareDialogOpen(true)}
-              className="text-copy-primary"
+              className="text-navbar-text hover:text-navbar-text"
             >
               <Share2 className="mr-1 h-4 w-4" />
               Share

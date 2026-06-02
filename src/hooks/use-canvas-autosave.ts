@@ -19,6 +19,7 @@ interface UseCanvasAutosaveOptions {
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SAVED_STATUS_VISIBLE_MS = 2500;
+const ERROR_STATUS_VISIBLE_MS = 2500;
 
 export function useCanvasAutosave({
   edges,
@@ -35,6 +36,7 @@ export function useCanvasAutosave({
   const lastSavedSnapshotRef = useRef<string | null>(null);
   const queuedSaveSnapshotRef = useRef<string | null>(null);
   const saveSequenceRef = useRef(0);
+  const errorStatusTimeoutRef = useRef<number | null>(null);
   const savedStatusTimeoutRef = useRef<number | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const snapshot = useMemo<CanvasSnapshot>(
@@ -45,6 +47,15 @@ export function useCanvasAutosave({
     () => JSON.stringify(snapshot),
     [snapshot],
   );
+
+  const clearErrorStatusTimeout = useCallback(() => {
+    if (errorStatusTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(errorStatusTimeoutRef.current);
+    errorStatusTimeoutRef.current = null;
+  }, []);
 
   const clearSavedStatusTimeout = useCallback(() => {
     if (savedStatusTimeoutRef.current === null) {
@@ -76,6 +87,7 @@ export function useCanvasAutosave({
       }
 
       clearSavedStatusTimeout();
+      clearErrorStatusTimeout();
 
       const saveSequence = saveSequenceRef.current + 1;
       saveSequenceRef.current = saveSequence;
@@ -104,6 +116,7 @@ export function useCanvasAutosave({
             queuedSaveSnapshotRef.current === null ||
             queuedSaveSnapshotRef.current === snapshotToSave
           ) {
+            clearErrorStatusTimeout();
             setStatus("saved");
             savedStatusTimeoutRef.current = window.setTimeout(() => {
               if (saveSequenceRef.current === saveSequence) {
@@ -122,6 +135,11 @@ export function useCanvasAutosave({
             queuedSaveSnapshotRef.current === null
           ) {
             setStatus("error");
+            errorStatusTimeoutRef.current = window.setTimeout(() => {
+              if (saveSequenceRef.current === saveSequence) {
+                setStatus("idle");
+              }
+            }, ERROR_STATUS_VISIBLE_MS);
           }
         })
         .finally(() => {
@@ -143,7 +161,7 @@ export function useCanvasAutosave({
           }
         });
     },
-    [clearSavedStatusTimeout, projectId],
+    [clearErrorStatusTimeout, clearSavedStatusTimeout, projectId],
   );
 
   const saveNow = useCallback(() => {
@@ -202,9 +220,10 @@ export function useCanvasAutosave({
       isUnmountedRef.current = true;
       clearSaveTimeout();
       clearSavedStatusTimeout();
+      clearErrorStatusTimeout();
       abortControllerRef.current?.abort();
     };
-  }, [clearSaveTimeout, clearSavedStatusTimeout]);
+  }, [clearErrorStatusTimeout, clearSaveTimeout, clearSavedStatusTimeout]);
 
   return { saveNow, status };
 }

@@ -37,7 +37,7 @@ export function EditorNavbar({
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 h-14 border-b border-border/70 bg-card/95 px-4 text-copy-primary backdrop-blur supports-[backdrop-filter]:bg-card/80",
+        "fixed inset-x-0 top-0 z-50 h-14 border-b border-navbar-border bg-navbar-bg px-4 text-navbar-text backdrop-blur supports-[backdrop-filter]:bg-navbar-bg",
         className,
       )}
     >
@@ -50,7 +50,7 @@ export function EditorNavbar({
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             aria-expanded={sidebarOpen}
             aria-controls={sidebarId}
-            className="border border-border/60 bg-background/60 text-copy-primary hover:bg-muted"
+            className="border border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
           >
             {sidebarOpen ? (
               <PanelLeftClose className="h-4 w-4" suppressHydrationWarning />
@@ -63,11 +63,11 @@ export function EditorNavbar({
           </Button>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center justify-center text-copy-primary">
+        <div className="flex min-w-0 flex-1 items-center justify-center text-navbar-text">
           {centerSection}
         </div>
 
-        <div className="flex min-w-0 items-center justify-end gap-2 text-copy-primary">
+        <div className="flex min-w-0 items-center justify-end gap-2 text-navbar-text">
           <ThemeToggle />
           {rightSection}
         </div>
