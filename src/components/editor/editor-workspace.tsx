@@ -1,7 +1,13 @@
 "use client";
 
+import {
+  ClientSideSuspense,
+  LiveblocksProvider,
+  RoomProvider,
+} from "@liveblocks/react/suspense";
 import { Bot, LayoutTemplate, Save, Share2 } from "lucide-react";
 import { useState } from "react";
+import { CanvasErrorBoundary } from "~/components/editor/canvas-error-boundary";
 import {
   CreateProjectDialog,
   DeleteProjectDialog,
@@ -132,19 +138,31 @@ export function EditorWorkspace({
           dialogs={dialogs}
         />
 
-        <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
-          <CollaborativeCanvas
-            manualSaveRequestId={manualSaveRequestId}
-            onSaveStatusChange={setCanvasSaveStatus}
-            roomId={projectId}
-            templateImportRequest={templateImportRequest}
-          />
+        <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
+          <RoomProvider
+            id={projectId}
+            initialPresence={{ cursor: null, thinking: false }}
+          >
+            <CanvasErrorBoundary fallback={<SharedRoomConnectionError />}>
+              <ClientSideSuspense fallback={<SharedRoomLoading />}>
+                <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
+                  <CollaborativeCanvas
+                    manualSaveRequestId={manualSaveRequestId}
+                    onSaveStatusChange={setCanvasSaveStatus}
+                    projectId={projectId}
+                    templateImportRequest={templateImportRequest}
+                  />
 
-          <AIWorkspaceSidebar
-            isOpen={aiSidebarOpen}
-            onClose={() => setAiSidebarOpen(false)}
-          />
-        </div>
+                  <AIWorkspaceSidebar
+                    isOpen={aiSidebarOpen}
+                    onClose={() => setAiSidebarOpen(false)}
+                    roomId={projectId}
+                  />
+                </div>
+              </ClientSideSuspense>
+            </CanvasErrorBoundary>
+          </RoomProvider>
+        </LiveblocksProvider>
       </div>
 
       <CreateProjectDialog
@@ -177,6 +195,29 @@ export function EditorWorkspace({
         onOpenChange={setTemplatesModalOpen}
         onImport={importTemplate}
       />
+    </div>
+  );
+}
+
+function SharedRoomLoading() {
+  return (
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-1 items-center justify-center bg-background text-sm text-muted-foreground">
+      Loading workspace...
+    </div>
+  );
+}
+
+function SharedRoomConnectionError() {
+  return (
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-1 items-center justify-center bg-background p-6 text-center">
+      <div>
+        <h2 className="text-sm font-medium text-foreground">
+          Workspace connection failed
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          Check your connection and refresh the workspace.
+        </p>
+      </div>
     </div>
   );
 }

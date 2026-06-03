@@ -3,11 +3,10 @@
 import { UserButton, useAuth } from "@clerk/nextjs";
 import {
   ClientSideSuspense,
-  LiveblocksProvider,
-  RoomProvider,
   shallow,
   useCanRedo,
   useCanUndo,
+  useEventListener,
   useOthers,
   useRedo,
   useUndo,
@@ -45,6 +44,7 @@ import {
   Database,
   Diamond,
   Hexagon,
+  Loader2,
   type LucideIcon,
   Maximize2,
   Minus,
@@ -87,12 +87,17 @@ import {
   type NodeColor,
   type NodeShape,
 } from "../../../types/canvas";
+import {
+  AI_STATUS_FEED_NAME,
+  type AiStatusFeedPayload,
+  parseAiStatusFeedPayload,
+} from "../../../types/tasks";
 import type { CanvasTemplate } from "./starter-templates";
 
 interface CollaborativeCanvasProps {
   manualSaveRequestId: number;
   onSaveStatusChange: (status: CanvasSaveStatus) => void;
-  roomId: string;
+  projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
 }
 
@@ -122,6 +127,7 @@ interface CollaboratorPresence {
   cursor: { flowX: number; flowY: number } | null;
   cursorColor: string;
   displayName: string;
+  thinking: boolean;
 }
 
 interface DragPreviewState extends ShapeDragPayload {
@@ -282,6 +288,7 @@ function useCollaboratorPresence(currentUserId: string | null | undefined) {
             cursor: other.presence.cursor,
             cursorColor: other.info.cursorColor,
             displayName: other.info.displayName,
+            thinking: other.presence.thinking,
           }),
         ),
     shallow,
@@ -796,7 +803,11 @@ function CollaboratorAvatar({
   avatarUrl,
   cursorColor,
   displayName,
-}: Pick<CollaboratorPresence, "avatarUrl" | "cursorColor" | "displayName">) {
+  thinking,
+}: Pick<
+  CollaboratorPresence,
+  "avatarUrl" | "cursorColor" | "displayName" | "thinking"
+>) {
   const initials = getInitials(displayName);
 
   return (
@@ -809,7 +820,9 @@ function CollaboratorAvatar({
         backgroundImage: avatarUrl ? `url(${avatarUrl})` : undefined,
         backgroundPosition: "center",
         backgroundSize: "cover",
-        boxShadow: "0 0 0 1px var(--border)",
+        boxShadow: thinking
+          ? "0 0 0 1px var(--border), 0 0 0 4px hsl(var(--accent))"
+          : "0 0 0 1px var(--border)",
       }}
       title={displayName}
     >
@@ -834,6 +847,7 @@ function PresenceAvatarGroup() {
               cursorColor={collaborator.cursorColor}
               displayName={collaborator.displayName}
               key={collaborator.connectionId}
+              thinking={collaborator.thinking}
             />
           ))}
           {overflowCount > 0 ? (
@@ -853,6 +867,65 @@ function PresenceAvatarGroup() {
           },
         }}
       />
+    </div>
+  );
+}
+
+function DesignAgentStatusFeed() {
+  const [message, setMessage] = useState<AiStatusFeedPayload | null>(null);
+
+  useEventListener(({ event }) => {
+    if (event.type !== AI_STATUS_FEED_NAME) {
+      return;
+    }
+
+    const payload = parseAiStatusFeedPayload(event.payload);
+
+    if (!payload) {
+      return;
+    }
+
+    setMessage(payload);
+  });
+
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const visibleMessageId = message.id;
+    const timeoutId = window.setTimeout(() => {
+      setMessage((currentMessage) =>
+        currentMessage?.id === visibleMessageId ? null : currentMessage,
+      );
+    }, 5_000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message]);
+
+  if (!message?.text) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none absolute left-1/2 top-6 z-30 flex w-[min(28rem,calc(100%-2rem))] -translate-x-1/2 flex-col gap-2">
+      <div className="rounded-lg border border-border bg-card/95 px-4 py-3 text-sm text-foreground shadow-xl backdrop-blur">
+        <div className="flex items-start gap-2">
+          <span
+            aria-hidden="true"
+            className="mt-1 h-2 w-2 shrink-0 rounded-full"
+            style={{
+              backgroundColor:
+                message.state === "error"
+                  ? "hsl(var(--destructive))"
+                  : message.state === "success"
+                    ? "hsl(var(--accent-foreground))"
+                    : "hsl(var(--muted-foreground))",
+            }}
+          />
+          <p className="min-w-0 leading-5">{message.text}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -886,10 +959,13 @@ function LiveCursor({ participant }: { participant: CollaboratorPresence }) {
         <path d="M4 2.5 16.5 10 10.2 11.4 7 17.2 4 2.5Z" />
       </svg>
       <div
-        className="ml-1 mt-3 max-w-40 truncate rounded-full px-2 py-0.5 text-xs font-medium text-background shadow-lg"
+        className="ml-1 mt-3 flex max-w-40 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-background shadow-lg"
         style={{ backgroundColor: participant.cursorColor }}
       >
-        {participant.displayName}
+        {participant.thinking ? (
+          <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+        ) : null}
+        <span className="min-w-0 truncate">{participant.displayName}</span>
       </div>
     </div>
   );
@@ -1483,6 +1559,7 @@ function SyncedCanvas({
         <ShapeDragPreview preview={dragPreview} />
       </ReactFlow>
       <PresenceAvatarGroup />
+      <DesignAgentStatusFeed />
       <LiveCursors />
     </div>
   );
@@ -1491,30 +1568,23 @@ function SyncedCanvas({
 export function CollaborativeCanvas({
   manualSaveRequestId,
   onSaveStatusChange,
-  roomId,
+  projectId,
   templateImportRequest,
 }: CollaborativeCanvasProps) {
   return (
     <main className="h-[calc(100vh-3.5rem)] flex-1 bg-background">
-      <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
-        <RoomProvider
-          id={roomId}
-          initialPresence={{ cursor: null, thinking: false }}
-        >
-          <CanvasErrorBoundary fallback={<CanvasConnectionError />}>
-            <ClientSideSuspense fallback={<CanvasLoading />}>
-              <ReactFlowProvider>
-                <SyncedCanvas
-                  manualSaveRequestId={manualSaveRequestId}
-                  onSaveStatusChange={onSaveStatusChange}
-                  projectId={roomId}
-                  templateImportRequest={templateImportRequest}
-                />
-              </ReactFlowProvider>
-            </ClientSideSuspense>
-          </CanvasErrorBoundary>
-        </RoomProvider>
-      </LiveblocksProvider>
+      <CanvasErrorBoundary fallback={<CanvasConnectionError />}>
+        <ClientSideSuspense fallback={<CanvasLoading />}>
+          <ReactFlowProvider>
+            <SyncedCanvas
+              manualSaveRequestId={manualSaveRequestId}
+              onSaveStatusChange={onSaveStatusChange}
+              projectId={projectId}
+              templateImportRequest={templateImportRequest}
+            />
+          </ReactFlowProvider>
+        </ClientSideSuspense>
+      </CanvasErrorBoundary>
     </main>
   );
 }
