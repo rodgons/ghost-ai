@@ -7,7 +7,7 @@
 | Framework        | Next.js 16 + TypeScript | Full-stack app with server/client boundaries                   |
 | UI               | Tailwind + shadcn/ui    | Component composition and styling                              |
 | Auth             | Clerk                   | User identity and route protection                             |
-| Database         | Prisma + PostgreSQL     | Relational metadata: projects, collaborators, specs, task runs |
+| Database         | Prisma + PostgreSQL     | Relational metadata: projects, collaborators, specs, task runs, chat history |
 | Canvas           | Liveblocks + React Flow | Real-time collaborative canvas, presence, and cursors          |
 | Background tasks | Trigger.dev             | Durable AI generation workflows                                |
 | Artifact storage | Vercel Blob             | Canvas snapshots and generated Markdown specs                  |
@@ -23,9 +23,9 @@
 
 ## Storage Model
 
-- **Database**: metadata, ownership, relationships, and task run records.
+- **Database**: metadata, ownership, relationships, task run records, and project-scoped AI chat history.
 - **Vercel Blob**: generated artifacts — canvas snapshots at `canvas/{projectId}.json` and specs at `specs/{projectId}/{specId}.md`.
-- Project records, spec records, and task run records belong in PostgreSQL.
+- Project records, spec records, task run records, and AI chat message records belong in PostgreSQL.
 - Canvas content and Markdown output are stored in and retrieved from Vercel Blob.
 - The blob URL is stored in the database (`canvasJsonPath`, `filePath`) as the reference to the artifact.
 
