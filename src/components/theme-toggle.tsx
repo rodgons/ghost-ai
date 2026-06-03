@@ -12,6 +12,7 @@ export function ThemeToggle() {
     <Button
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       aria-pressed={!isDark}
+      suppressHydrationWarning
       className="border border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
       onClick={toggleTheme}
       size="icon-sm"
@@ -23,7 +24,7 @@ export function ThemeToggle() {
       ) : (
         <Moon className="h-4 w-4" suppressHydrationWarning />
       )}
-      <span className="sr-only">
+      <span className="sr-only" suppressHydrationWarning>
         {isDark ? "Switch to light mode" : "Switch to dark mode"}
       </span>
     </Button>
