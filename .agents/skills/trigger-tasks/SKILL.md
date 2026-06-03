@@ -121,7 +121,7 @@ export const taskWithWaits = task({
   run: async (payload) => {
     await wait.for({ seconds: 30 });
     await wait.for({ minutes: 5 });
-    await wait.until({ date: new Date("2024-12-25") });
+    await wait.until({ date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
 
     // Wait for external approval
     await wait.forToken({

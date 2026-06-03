@@ -87,7 +87,7 @@ Or from the Trigger.dev dashboard "Test" tab.
 
 ## Project Structure
 
-```
+```text
 your-project/
 ├── trigger.config.ts    # Required - project config
 ├── trigger/             # Required - task files

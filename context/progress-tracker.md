@@ -309,3 +309,6 @@
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: retry saving an AI Architect chat message; the route should now see `prisma.aiChatMessage`.
 - Open questions: none.
+- Completed review finding verification and fixed the still-valid issues in Trigger skill docs, feature specs, Prisma schema, AI design run persistence/token auth, AI chat persistence, prompt validation, sidebar send state, and Liveblocks canvas snapshot reads.
+- Added migration `20260603002000_add_ai_chat_role_enum_and_task_run_project_index` and regenerated the Prisma client; local migration application is still pending because Postgres was unreachable at `localhost:5432`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.

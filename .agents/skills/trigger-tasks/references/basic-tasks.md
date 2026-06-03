@@ -161,7 +161,7 @@ export const taskWithWaits = task({
     await wait.for({ days: 1 });
 
     // Wait until specific date
-    await wait.until({ date: new Date("2024-12-25") });
+    await wait.until({ date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
 
     // Wait for token (from external system)
     await wait.forToken({

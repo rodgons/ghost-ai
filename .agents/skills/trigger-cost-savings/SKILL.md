@@ -20,7 +20,7 @@ Before analysis, verify these MCP tools are available:
 
 If these tools are **not available**, instruct the user:
 
-```
+```text
 To analyze your runs, you need the Trigger.dev MCP server installed.
 
 Run this command to install it:
@@ -36,7 +36,7 @@ Do NOT proceed with run analysis without MCP tools. You can still review source 
 
 Before giving recommendations, fetch the latest guidance:
 
-```
+```text
 WebFetch: https://trigger.dev/docs/how-to-reduce-your-spend
 ```
 
@@ -64,7 +64,7 @@ Use MCP tools to analyze actual usage patterns:
 
 #### 2a. Identify expensive tasks
 
-```
+```text
 list_runs with filters:
 - period: "30d" or "7d"
 - Sort by duration or cost
@@ -78,7 +78,7 @@ Look for:
 
 #### 2b. Analyze failure patterns
 
-```
+```text
 list_runs with status: "FAILED" or "CRASHED"
 ```
 
@@ -89,7 +89,7 @@ For high-failure tasks:
 
 #### 2c. Check machine utilization
 
-```
+```text
 get_run_details for sample runs of each task
 ```
 
@@ -99,7 +99,7 @@ Compare actual resource usage against machine preset:
 
 #### 2d. Review schedule frequency
 
-```
+```text
 get_current_worker to list scheduled tasks and their cron patterns
 ```
 

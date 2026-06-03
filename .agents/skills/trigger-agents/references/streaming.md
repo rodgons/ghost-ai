@@ -58,7 +58,7 @@ export const processItems = task({
 
 ```typescript
 import { task } from "@trigger.dev/sdk";
-import { streamText } from "ai";
+import { openai, streamText } from "ai";
 import { aiOutputStream } from "./streams";
 
 export const generateText = task({
@@ -148,7 +148,8 @@ function Progress({ runId, accessToken }: { runId: string; accessToken: string }
 
 ```tsx
 import { useRealtimeRunWithStreams } from "@trigger.dev/react-hooks";
-import type { processItems, STREAMS } from "@/trigger/tasks";
+import type { processItems } from "@/trigger/tasks";
+import type { STREAMS } from "@/trigger/streams";
 
 function TaskProgress({ runId, accessToken }: Props) {
   const { run, streams } = useRealtimeRunWithStreams<typeof processItems, STREAMS>(

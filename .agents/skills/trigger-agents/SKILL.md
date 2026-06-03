@@ -9,7 +9,7 @@ Build production-ready AI agents using Trigger.dev's durable execution.
 
 ## Pattern Selection
 
-```
+```text
 Need to...                              → Use
 ─────────────────────────────────────────────────────
 Process items in parallel               → Parallelization

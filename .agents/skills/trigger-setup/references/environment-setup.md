@@ -27,7 +27,7 @@ TRIGGER_SECRET_KEY=tr_dev_xxxxx
 
 Add to `.gitignore`:
 
-```
+```gitignore
 .env
 .env.local
 ```

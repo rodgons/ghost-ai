@@ -2,7 +2,7 @@
 
 ## Default Layout
 
-```
+```text
 your-project/
 ├── trigger.config.ts    # Required - project configuration
 ├── trigger/             # Default task directory
@@ -16,7 +16,7 @@ your-project/
 
 For monorepos, place `trigger.config.ts` in the package that contains your tasks:
 
-```
+```text
 monorepo/
 ├── packages/
 │   ├── api/
@@ -48,7 +48,7 @@ export default defineConfig({
 
 Keep tasks next to related code:
 
-```
+```text
 src/
 ├── users/
 │   ├── routes.ts

@@ -34,7 +34,7 @@ in real time, and reflect AI-driven canvas updates through Liveblocks.
 
 ### UI Details
 
-- Use existing design tokens from `global.css` (do not introduce new colors)
+- Use existing design tokens from `src/app/globals.css` (do not introduce new colors)
 - Follow `ui-context.md` for layout and visual consistency
 
 Chat bubbles
