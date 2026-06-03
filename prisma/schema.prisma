@@ -26,7 +26,9 @@ model Project {
   canvasJsonPath   String?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+  aiChatMessages   AiChatMessage[]
   collaborators    ProjectCollaborator[]
+  taskRuns         TaskRun[]
 
   @@index([ownerId, createdAt])
 }
@@ -43,3 +45,30 @@ model ProjectCollaborator {
   @@index([projectId, createdAt])
 }
 
+model TaskRun {
+  id        String   @id @default(uuid())
+  runId     String   @unique
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@index([userId, projectId])
+}
+
+model AiChatMessage {
+  id                  String   @id
+  project             Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId           String
+  role                String
+  content             String   @db.Text
+  senderId            String
+  senderDisplayName   String
+  senderAvatarUrl     String
+  senderCursorColor   String
+  sentAt              DateTime
+  createdAt           DateTime @default(now())
+
+  @@index([projectId, sentAt])
+  @@index([senderId, projectId])
+}

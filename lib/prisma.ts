@@ -16,10 +16,19 @@ function createClient() {
   return new PrismaClient({ adapter });
 }
 
+function hasCurrentGeneratedDelegates(client: PrismaClient) {
+  return "aiChatMessage" in client;
+}
+
 if (process.env.NODE_ENV === "development") {
-  if (!global.prisma) {
+  if (!global.prisma || !hasCurrentGeneratedDelegates(global.prisma)) {
+    if (global.prisma) {
+      void global.prisma.$disconnect().catch(() => null);
+    }
+
     global.prisma = createClient();
   }
+
   prismaClient = global.prisma as PrismaClient;
 } else {
   prismaClient = createClient();
