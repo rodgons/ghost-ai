@@ -46,3 +46,5 @@ next-env.d.ts
 /node_modules/@prisma/client/.prisma/client
 
 /src/generated/**
+
+.trigger
