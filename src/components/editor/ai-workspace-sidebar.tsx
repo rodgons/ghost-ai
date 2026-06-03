@@ -564,6 +564,7 @@ function AIArchitectTab({
 
       finalizedRunIdsRef.current.delete(responseBody.runId);
       setActiveRun(responseBody);
+      setIsSending(false);
     } catch (error) {
       const content =
         error instanceof Error

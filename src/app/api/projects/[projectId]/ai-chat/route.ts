@@ -1,3 +1,5 @@
+import { clerkClient } from "@clerk/nextjs/server";
+import { getCursorColorForUser } from "@/lib/liveblocks";
 import prisma from "@/lib/prisma";
 import {
   canAccessProject,
@@ -31,7 +33,7 @@ async function verifyProjectAccess(projectId: string) {
     return { status: 403 as const };
   }
 
-  return { status: 200 as const };
+  return { identity, status: 200 as const };
 }
 
 function toChatMessagePayload(message: {
@@ -68,12 +70,13 @@ export async function GET(_request: Request, { params }: AiChatRouteContext) {
 
   const messages = await prisma.aiChatMessage.findMany({
     where: { projectId },
-    orderBy: { sentAt: "asc" },
+    orderBy: { sentAt: "desc" },
     take: 200,
   });
+  const chronologicalMessages = messages.reverse();
 
   return Response.json({
-    messages: messages.map(toChatMessagePayload),
+    messages: chronologicalMessages.map(toChatMessagePayload),
   });
 }
 
@@ -93,36 +96,37 @@ export async function POST(request: Request, { params }: AiChatRouteContext) {
   }
 
   const message = parsed.data;
+
+  if (message.role !== "user") {
+    return new Response(null, { status: 403 });
+  }
+
   const existingMessage = await prisma.aiChatMessage.findUnique({
     where: { id: message.id },
-    select: { projectId: true },
+    select: { id: true },
   });
 
-  if (existingMessage && existingMessage.projectId !== projectId) {
+  if (existingMessage) {
     return new Response(null, { status: 409 });
   }
 
-  const savedMessage = await prisma.aiChatMessage.upsert({
-    where: { id: message.id },
-    create: {
+  const client = await clerkClient();
+  const clerkUser = await client.users.getUser(access.identity.userId);
+  const savedMessage = await prisma.aiChatMessage.create({
+    data: {
       content: message.content,
       id: message.id,
       projectId,
-      role: message.role,
-      senderAvatarUrl: message.sender.avatarUrl,
-      senderCursorColor: message.sender.cursorColor,
-      senderDisplayName: message.sender.displayName,
-      senderId: message.sender.id,
-      sentAt: new Date(message.timestamp),
-    },
-    update: {
-      content: message.content,
-      role: message.role,
-      senderAvatarUrl: message.sender.avatarUrl,
-      senderCursorColor: message.sender.cursorColor,
-      senderDisplayName: message.sender.displayName,
-      senderId: message.sender.id,
-      sentAt: new Date(message.timestamp),
+      role: "user",
+      senderAvatarUrl: clerkUser.imageUrl,
+      senderCursorColor: getCursorColorForUser(access.identity.userId),
+      senderDisplayName:
+        clerkUser.fullName ??
+        clerkUser.username ??
+        access.identity.email ??
+        "User",
+      senderId: access.identity.userId,
+      sentAt: new Date(),
     },
   });
 

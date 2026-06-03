@@ -1,7 +1,10 @@
 import { auth } from "@trigger.dev/sdk";
 import { parseDesignRunTokenRequest } from "@/lib/ai/design-agent";
 import prisma from "@/lib/prisma";
-import { getCurrentClerkIdentity } from "@/lib/project-access";
+import {
+  canAccessProject,
+  getCurrentClerkIdentity,
+} from "@/lib/project-access";
 
 export const runtime = "nodejs";
 
@@ -22,6 +25,7 @@ export async function POST(request: Request) {
   const taskRun = await prisma.taskRun.findUnique({
     where: { runId },
     select: {
+      projectId: true,
       userId: true,
     },
   });
@@ -30,7 +34,13 @@ export async function POST(request: Request) {
     return new Response(null, { status: 404 });
   }
 
-  if (taskRun.userId !== identity.userId) {
+  const hasAccess = await canAccessProject(
+    taskRun.projectId,
+    identity.userId,
+    identity.email,
+  );
+
+  if (!hasAccess) {
     return new Response(null, { status: 403 });
   }
 

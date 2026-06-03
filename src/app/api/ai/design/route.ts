@@ -1,4 +1,4 @@
-import { tasks, auth as triggerAuth } from "@trigger.dev/sdk";
+import { runs, tasks, auth as triggerAuth } from "@trigger.dev/sdk";
 import { parseDesignAgentRequest } from "@/lib/ai/design-agent";
 import prisma from "@/lib/prisma";
 import {
@@ -78,26 +78,46 @@ export async function POST(request: Request) {
     return storageError;
   }
 
-  const handle = await tasks.trigger<typeof designAgent>("design-agent", {
-    prompt: parsed.data.prompt,
-    roomId: parsed.data.roomId,
+  const pendingRun = await prisma.taskRun.create({
+    data: {
+      runId: crypto.randomUUID(),
+      projectId: parsed.data.projectId,
+      userId: identity.userId,
+    },
+    select: { id: true, runId: true },
   });
 
+  let handle: Awaited<ReturnType<typeof tasks.trigger<typeof designAgent>>>;
+
   try {
-    await prisma.taskRun.create({
-      data: {
-        runId: handle.id,
-        projectId: parsed.data.projectId,
-        userId: identity.userId,
+    handle = await tasks.trigger<typeof designAgent>(
+      "design-agent",
+      {
+        prompt: parsed.data.prompt,
+        roomId: parsed.data.roomId,
       },
+      {
+        idempotencyKey: pendingRun.runId,
+      },
+    );
+  } catch (error) {
+    await prisma.taskRun.delete({ where: { id: pendingRun.id } }).catch(() => {
+      // Ignore cleanup failures; original error should surface.
+    });
+
+    throw error;
+  }
+
+  try {
+    await prisma.taskRun.update({
+      where: { id: pendingRun.id },
+      data: { runId: handle.id },
       select: { id: true },
     });
   } catch (error) {
     if (!isMissingTaskRunTableError(error)) {
       try {
-        if (typeof handle.cancel === "function") {
-          await handle.cancel();
-        }
+        await runs.cancel(handle.id);
       } catch {
         // Ignore cleanup failures; original error should surface.
       }

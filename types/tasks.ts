@@ -7,6 +7,21 @@ export type AiStatusFeedState = "error" | "idle" | "success" | "working";
 export type AiStatusFeedScope = "design" | "spec";
 export type AiChatMessageRole = "assistant" | "user";
 
+export interface AiChatSenderPayload {
+  avatarUrl: string;
+  cursorColor: string;
+  displayName: string;
+  id: string;
+}
+
+export interface AiChatMessagePayload {
+  content: string;
+  id: string;
+  role: "assistant" | "user";
+  sender: AiChatSenderPayload;
+  timestamp: number;
+}
+
 export const aiChatMessageSchema = z.object({
   content: z.string().trim().min(1).max(4_000),
   id: z.string().trim().min(1),
@@ -20,13 +35,11 @@ export const aiChatMessageSchema = z.object({
   timestamp: z.number().finite(),
 });
 
-export type AiChatMessagePayload = z.infer<typeof aiChatMessageSchema>;
-
 export interface AiStatusFeedPayload {
   createdAt: number;
   id: string;
-  scope: AiStatusFeedScope;
-  state: AiStatusFeedState;
+  scope: "design" | "spec";
+  state: "error" | "idle" | "success" | "working";
   text?: string;
 }
 

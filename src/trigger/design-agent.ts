@@ -125,6 +125,13 @@ interface NodeLayout {
   y: number;
 }
 
+interface FlowStorageDocument {
+  flow?: {
+    edges?: Record<string, unknown> | unknown[];
+    nodes?: Record<string, unknown> | unknown[];
+  };
+}
+
 type ConnectionHandleId = "bottom" | "left" | "right" | "top";
 
 const AI_USER_ID = "ai:design-agent";
@@ -213,6 +220,50 @@ function getCenter(layout: NodeLayout) {
     x: layout.x + layout.width / 2,
     y: layout.y + layout.height / 2,
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function readFlowItems(value: Record<string, unknown> | unknown[] | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : Object.values(value);
+}
+
+function isCanvasNode(value: unknown): value is CanvasNode {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    isRecord(value.data) &&
+    typeof value.data.label === "string" &&
+    isRecord(value.data.color) &&
+    typeof value.data.color.fill === "string" &&
+    typeof value.data.color.text === "string" &&
+    typeof value.data.shape === "string" &&
+    isNodeShape(value.data.shape) &&
+    isRecord(value.position) &&
+    typeof value.position.x === "number" &&
+    Number.isFinite(value.position.x) &&
+    typeof value.position.y === "number" &&
+    Number.isFinite(value.position.y)
+  );
+}
+
+function isCanvasEdge(value: unknown): value is CanvasEdge {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.source === "string" &&
+    typeof value.target === "string" &&
+    (value.data === undefined ||
+      (isRecord(value.data) &&
+        (value.data.label === undefined ||
+          typeof value.data.label === "string")))
+  );
 }
 
 function getDirectionalConnectionHandles(
@@ -694,9 +745,10 @@ async function getCanvasSnapshot(roomId: string) {
 
   await runLiveblocksOperation(
     "Liveblocks read canvas snapshot",
-    mutateFlow<CanvasNode, CanvasEdge>({ client, roomId }, (flow) => {
-      nodes = [...flow.nodes];
-      edges = [...flow.edges];
+    client.getStorageDocument(roomId, "json").then((document) => {
+      const flowDocument = document as FlowStorageDocument;
+      nodes = readFlowItems(flowDocument.flow?.nodes).filter(isCanvasNode);
+      edges = readFlowItems(flowDocument.flow?.edges).filter(isCanvasEdge);
     }),
   );
 

@@ -9,6 +9,8 @@ interface DesignAgentValidationResult {
   error?: string;
 }
 
+export const MAX_PROMPT_LENGTH = 2000;
+
 function readRequiredString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -26,6 +28,10 @@ export function parseDesignAgentRequest(
 
   if (!prompt) {
     return { error: "Prompt is required." };
+  }
+
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    return { error: `Prompt exceeds ${MAX_PROMPT_LENGTH} characters.` };
   }
 
   if (!roomId) {
