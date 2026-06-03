@@ -1,4 +1,6 @@
+import { createHash, randomUUID } from "node:crypto";
 import { runs, tasks, auth as triggerAuth } from "@trigger.dev/sdk";
+import { Prisma } from "@/generated/prisma/client";
 import { parseDesignAgentRequest } from "@/lib/ai/design-agent";
 import prisma from "@/lib/prisma";
 import {
@@ -16,6 +18,37 @@ function isMissingTaskRunTableError(error: unknown) {
     "code" in error &&
     error.code === "P2021"
   );
+}
+
+function isUniqueConstraintError(error: unknown, field: string) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    Array.isArray(error.meta?.target) &&
+    error.meta.target.includes(field)
+  );
+}
+
+function getDesignRunIdempotencyKey({
+  projectId,
+  prompt,
+  roomId,
+  userId,
+}: {
+  projectId: string;
+  prompt: string;
+  roomId: string;
+  userId: string;
+}) {
+  return createHash("sha256")
+    .update(userId)
+    .update("\0")
+    .update(projectId)
+    .update("\0")
+    .update(roomId)
+    .update("\0")
+    .update(prompt)
+    .digest("hex");
 }
 
 async function verifyTaskRunStorage() {
@@ -78,14 +111,55 @@ export async function POST(request: Request) {
     return storageError;
   }
 
-  const pendingRun = await prisma.taskRun.create({
-    data: {
-      runId: crypto.randomUUID(),
-      projectId: parsed.data.projectId,
-      userId: identity.userId,
-    },
-    select: { id: true, runId: true },
+  const idempotencyKey = getDesignRunIdempotencyKey({
+    projectId: parsed.data.projectId,
+    prompt: parsed.data.prompt,
+    roomId: parsed.data.roomId,
+    userId: identity.userId,
   });
+  let pendingRun: { id: string; runId: string; idempotencyKey: string };
+
+  try {
+    pendingRun = await prisma.taskRun.create({
+      data: {
+        idempotencyKey,
+        runId: randomUUID(),
+        projectId: parsed.data.projectId,
+        userId: identity.userId,
+      },
+      select: { id: true, idempotencyKey: true, runId: true },
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error, "idempotencyKey")) {
+      throw error;
+    }
+
+    const existingRun = await prisma.taskRun.findUnique({
+      where: { idempotencyKey },
+      select: { runId: true },
+    });
+
+    if (existingRun?.runId.startsWith("run_")) {
+      const publicToken = await triggerAuth.createPublicToken({
+        scopes: {
+          read: {
+            runs: existingRun.runId,
+          },
+        },
+        expirationTime: "1h",
+      });
+
+      return Response.json(
+        { publicToken, runId: existingRun.runId },
+        { status: 202 },
+      );
+    }
+
+    return Response.json(
+      { error: "Design run is already being started." },
+      { status: 409 },
+    );
+  }
 
   let handle: Awaited<ReturnType<typeof tasks.trigger<typeof designAgent>>>;
 
@@ -97,7 +171,7 @@ export async function POST(request: Request) {
         roomId: parsed.data.roomId,
       },
       {
-        idempotencyKey: pendingRun.runId,
+        idempotencyKey: pendingRun.idempotencyKey,
       },
     );
   } catch (error) {
