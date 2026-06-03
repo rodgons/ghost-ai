@@ -2,4 +2,3 @@ version: 2
 ignore:
   - ".agents/**"
   - "context/**"
-  - "prisma/**"
