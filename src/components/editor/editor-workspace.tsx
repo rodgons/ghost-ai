@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, LayoutTemplate, Share2 } from "lucide-react";
+import { Bot, LayoutTemplate, Save, Share2 } from "lucide-react";
 import { useState } from "react";
 import {
   CreateProjectDialog,
@@ -9,8 +9,9 @@ import {
   ShareProjectDialog,
 } from "~/components/editor/dialogs";
 import { Button } from "~/components/ui/button";
+import type { CanvasSaveStatus } from "~/hooks/use-canvas-autosave";
 import { useProjectDialogs } from "~/hooks/use-project-dialogs";
-import { cn } from "~/lib/utils";
+import { AIWorkspaceSidebar } from "./ai-workspace-sidebar";
 import {
   type CanvasTemplateImportRequest,
   CollaborativeCanvas,
@@ -36,6 +37,9 @@ export function EditorWorkspace({
 }: WorkspaceProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [canvasSaveStatus, setCanvasSaveStatus] =
+    useState<CanvasSaveStatus>("idle");
+  const [manualSaveRequestId, setManualSaveRequestId] = useState(0);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [templateImportRequest, setTemplateImportRequest] =
@@ -44,6 +48,14 @@ export function EditorWorkspace({
 
   const toggleSidebar = () => setSidebarOpen((o) => !o);
   const toggleAiSidebar = () => setAiSidebarOpen((o) => !o);
+  const saveStatusLabel =
+    canvasSaveStatus === "saving"
+      ? "Saving"
+      : canvasSaveStatus === "error"
+        ? "Save error"
+        : canvasSaveStatus === "saved"
+          ? "Saved"
+          : "Save";
   const importTemplate = (template: CanvasTemplate) => {
     setTemplateImportRequest({
       id: Date.now(),
@@ -52,17 +64,37 @@ export function EditorWorkspace({
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-base text-primary">
+    <div className="min-h-screen overflow-hidden bg-base text-primary-text">
       <EditorNavbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
-        centerSection={<span className="font-medium">{projectName}</span>}
+        centerSection={
+          <span className="font-medium text-navbar-text">{projectName}</span>
+        }
         rightSection={
           <div className="flex items-center gap-2">
+            <Button
+              aria-live="polite"
+              disabled={canvasSaveStatus === "saving"}
+              onClick={() =>
+                setManualSaveRequestId((requestId) => requestId + 1)
+              }
+              size="sm"
+              variant="outline"
+              className={
+                canvasSaveStatus === "error"
+                  ? "border-destructive/50 text-destructive"
+                  : "border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
+              }
+            >
+              <Save className="mr-1 h-4 w-4" />
+              {saveStatusLabel}
+            </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setTemplatesModalOpen(true)}
+              className="border-navbar-border bg-navbar-control text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
             >
               <LayoutTemplate className="mr-1 h-4 w-4" />
               Templates
@@ -73,6 +105,7 @@ export function EditorWorkspace({
               onClick={toggleAiSidebar}
               aria-label="Toggle AI sidebar"
               aria-pressed={aiSidebarOpen}
+              className="text-navbar-text hover:bg-navbar-control-hover hover:text-navbar-text"
             >
               <Bot className="h-4 w-4" />
             </Button>
@@ -80,6 +113,7 @@ export function EditorWorkspace({
               variant="default"
               size="sm"
               onClick={() => setShareDialogOpen(true)}
+              className="text-navbar-text hover:text-navbar-text"
             >
               <Share2 className="mr-1 h-4 w-4" />
               Share
@@ -100,26 +134,16 @@ export function EditorWorkspace({
 
         <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
           <CollaborativeCanvas
+            manualSaveRequestId={manualSaveRequestId}
+            onSaveStatusChange={setCanvasSaveStatus}
             roomId={projectId}
             templateImportRequest={templateImportRequest}
           />
 
-          {/* Right AI sidebar placeholder */}
-          {aiSidebarOpen && (
-            <aside
-              className={cn(
-                "w-80 border-l border-border bg-popover p-4",
-                "flex flex-col",
-              )}
-            >
-              <h3 className="mb-2 text-sm font-medium text-foreground">
-                AI Chat (future)
-              </h3>
-              <div className="flex-1 text-muted-foreground">
-                AI functionality not implemented yet.
-              </div>
-            </aside>
-          )}
+          <AIWorkspaceSidebar
+            isOpen={aiSidebarOpen}
+            onClose={() => setAiSidebarOpen(false)}
+          />
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { CanvasEdge, CanvasNode, NodeShape } from "../../../types/canvas";
+import {
+  type CanvasEdge,
+  type CanvasNode,
+  getThemedNodeColor,
+  type NodeShape,
+} from "../../../types/canvas";
 import { CANVAS_TEMPLATES, type CanvasTemplate } from "./starter-templates";
 
 interface StarterTemplatesModalProps {
@@ -184,6 +190,7 @@ function PreviewNodeShape({
 }
 
 function TemplatePreview({ template }: { template: CanvasTemplate }) {
+  const { theme } = useTheme();
   const transform = getPreviewTransform(template.nodes);
   const nodeById = new Map(template.nodes.map((node) => [node.id, node]));
 
@@ -220,22 +227,23 @@ function TemplatePreview({ template }: { template: CanvasTemplate }) {
       })}
       {template.nodes.map((node) => {
         const box = transformBox(getNodeBox(node), transform);
+        const displayColor = getThemedNodeColor(node.data.color, theme);
 
         return (
           <g key={node.id}>
             <PreviewNodeShape
               box={box}
-              color={node.data.color}
+              color={displayColor}
               label={node.data.label}
               shape={node.data.shape}
             />
             <text
               dominantBaseline="middle"
-              fill={node.data.color.text}
+              fill={displayColor.text}
               fontSize="8"
               fontWeight="600"
               paintOrder="stroke"
-              stroke={node.data.color.fill}
+              stroke={displayColor.fill}
               strokeLinejoin="round"
               strokeWidth="3"
               textAnchor="middle"

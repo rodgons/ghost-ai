@@ -2,29 +2,29 @@
 
 ## Theme
 
-Dark only. No light mode. The visual language is a dark technical workspace — near-black backgrounds, layered surfaces, and vivid accent colors for interactive elements.
+Dark mode remains the default visual language: a technical workspace with near-black backgrounds, layered surfaces, and vivid accent colors for interactive elements. Light mode is available through the editor navbar theme toggle and reuses the same semantic token names with brighter surface values.
 
 All colors are defined as CSS custom properties in `globals.css` and mapped to Tailwind tokens via `@theme inline`. Components must use these tokens — no hardcoded hex values or raw Tailwind color classes like `zinc-*`.
 
-| Role             | CSS Variable           | Hex / Value               |
-| ---------------- | ---------------------- | ------------------------- |
-| Page background  | `--bg-base`            | `#080809`                 |
-| Surface          | `--bg-surface`         | `#111114`                 |
-| Elevated surface | `--bg-elevated`        | `#18181c`                 |
-| Subtle surface   | `--bg-subtle`          | `#1e1e23`                 |
-| Default border   | `--border-default`     | `#2a2a30`                 |
-| Subtle border    | `--border-subtle`      | `#3a3a42`                 |
-| Primary text     | `--text-primary`       | `#f0f0f4`                 |
-| Secondary text   | `--text-secondary`     | `#c0c0cc`                 |
-| Muted text       | `--text-muted`         | `#808090`                 |
-| Faint text       | `--text-faint`         | `#505060`                 |
-| Brand accent     | `--accent-primary`     | `#00c8d4` (cyan)          |
-| Brand dim        | `--accent-primary-dim` | `rgba(0, 200, 212, 0.12)` |
-| AI accent        | `--accent-ai`          | `#6457f9` (indigo-purple) |
-| AI text          | `--accent-ai-text`     | `#8b82ff`                 |
-| Error            | `--state-error`        | `#ff4d4f`                 |
-| Success          | `--state-success`      | `#34d399`                 |
-| Warning          | `--state-warning`      | `#fbbf24`                 |
+| Role             | CSS Variable           | Dark Value                | Light Value               |
+| ---------------- | ---------------------- | ------------------------- | ------------------------- |
+| Page background  | `--bg-base`            | `#080809`                 | `#f7f8fb`                 |
+| Surface          | `--bg-surface`         | `#111114`                 | `#ffffff`                 |
+| Elevated surface | `--bg-elevated`        | `#18181c`                 | `#eef2f7`                 |
+| Subtle surface   | `--bg-subtle`          | `#1e1e23`                 | `#e5e9f0`                 |
+| Default border   | `--border-default`     | `#2a2a30`                 | `#d3dae5`                 |
+| Subtle border    | `--border-subtle`      | `#3a3a42`                 | `#b8c2d0`                 |
+| Primary text     | `--text-primary`       | `#f0f0f4`                 | `#14161b`                 |
+| Secondary text   | `--text-secondary`     | `#c0c0cc`                 | `#454b57`                 |
+| Muted text       | `--text-muted`         | `#808090`                 | `#697283`                 |
+| Faint text       | `--text-faint`         | `#505060`                 | `#9aa3b1`                 |
+| Brand accent     | `--accent-primary`     | `#00c8d4`                 | `#00c8d4`                 |
+| Brand dim        | `--accent-primary-dim` | `rgba(0, 200, 212, 0.12)` | `rgba(0, 200, 212, 0.16)` |
+| AI accent        | `--accent-ai`          | `#6457f9`                 | `#6457f9`                 |
+| AI text          | `--accent-ai-text`     | `#8b82ff`                 | `#5046d8`                 |
+| Error            | `--state-error`        | `#ff4d4f`                 | `#ff4d4f`                 |
+| Success          | `--state-success`      | `#34d399`                 | `#059669`                 |
+| Warning          | `--state-warning`      | `#fbbf24`                 | `#b7791f`                 |
 
 Tailwind utility names map to these variables. Use `bg-base`, `bg-surface`, `text-copy-primary`, `text-copy-muted`, `border-surface-border`, `text-brand`, `bg-accent-dim`, etc.
 
@@ -51,7 +51,7 @@ Radius increases with surface depth — smaller for inner elements, larger for o
 
 ### Node Color Palette
 
-8 defined color pairs. Each pair specifies a dark node fill and a vivid contrasting text color tuned for readability on the dark canvas. Defined in `types/canvas.ts` as `NODE_COLORS`.
+8 defined color pairs. Each pair specifies the stored dark node fill and vivid contrasting text color. Light mode resolves these stored pairs to matching light display fills in `types/canvas.ts` without migrating saved canvas data.
 
 | Node fill | Text color | Character              |
 | --------- | ---------- | ---------------------- |
@@ -98,7 +98,7 @@ shadcn/ui on top of Tailwind. No custom design system. Components live in `compo
 - Editor workspace: full-viewport layout — floating sidebar overlay on the left, center canvas, slide-over AI sidebar on the right.
 - Sidebars: floating overlay with dark semi-transparent background and subtle border.
 - Modals and dialogs: centered overlay, `rounded-3xl`, dark background with backdrop blur.
-- Navbar: top bar with dark background and bottom border.
+- Navbar: top bar with tokenized background, bottom border, and a theme toggle.
 
 ## Icons
 

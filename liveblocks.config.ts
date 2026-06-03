@@ -4,8 +4,8 @@ import type { CanvasEdge, CanvasNode } from "./types/canvas";
 declare global {
   interface Liveblocks {
     Presence: {
-      cursor: { x: number; y: number } | null;
-      isThinking: boolean;
+      cursor: { flowX: number; flowY: number } | null;
+      thinking: boolean;
     };
 
     Storage: {

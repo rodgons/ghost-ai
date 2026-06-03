@@ -2,7 +2,7 @@
 
 import { Lock } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,9 +21,9 @@ export default function AccessDenied() {
       <p className="text-muted-foreground">
         You don’t have permission to view this project.
       </p>
-      <Button asChild variant="default">
-        <Link href="/editor">Back to Projects</Link>
-      </Button>
+      <Link className={buttonVariants({ variant: "default" })} href="/editor">
+        Back to Projects
+      </Link>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/ui/themes";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import "@xyflow/react/dist/style.css";
 import "./globals.css";
 
@@ -20,6 +21,17 @@ export const metadata: Metadata = {
   description: "Secure AI workspace powered by Clerk",
 };
 
+const themeInitScript = `(() => {
+  try {
+    const theme = window.localStorage.getItem("ghost-ai-theme");
+    const nextTheme = theme === "light" || theme === "dark" ? theme : "dark";
+    const root = document.documentElement;
+    root.classList.toggle("dark", nextTheme === "dark");
+    root.classList.toggle("light", nextTheme === "light");
+  } catch {
+  }
+})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,6 +43,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Theme class must be set before first paint.
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+      </head>
       <body className="min-h-full bg-background text-foreground">
         <ClerkProvider
           afterSignOutUrl="/sign-in"
@@ -49,7 +67,7 @@ export default function RootLayout({
             },
           }}
         >
-          {children}
+          <ThemeProvider>{children}</ThemeProvider>
         </ClerkProvider>
       </body>
     </html>

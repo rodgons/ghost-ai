@@ -82,3 +82,77 @@
 - Updated node labels to use the node fill color on an accent highlight, with matching highlighted labels in starter template previews.
 - Changed live canvas node labels from accent highlight chips to shape-colored text with a lighter accent outline.
 - Changed node label outlines to use the darker shape fill while label text uses the lighter node color.
+- Current goal: implement `context/feature-specs/19-presence-avatars-cursor.md`.
+- Next steps: rename the shared Liveblocks presence field to `thinking`, add room-only participant avatars in the editor canvas, broadcast cursor positions from React Flow mouse movement, render collaborator cursors, then run format, lint, and build.
+- Open questions: none.
+- Renamed the Liveblocks presence `isThinking` field to the spec-required `thinking` field.
+- Added a canvas-room-only presence overlay that renders up to five collaborator avatars, an overflow chip, a conditional divider, and the existing Clerk `UserButton`.
+- Added custom live cursor broadcasting from React Flow mouse movement and custom cursor rendering for other participants only.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Fixed the access denied link to use shared button styling directly on `next/link`, removing the Base UI non-native button console warning.
+- Verified the access denied link fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Fixed live cursor presence updates during node dragging, selection dragging, shape dragover, and shape drops so collaborator cursors keep moving while canvas items are dragged.
+- Verified the drag cursor fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Moved the presence avatar group and live cursor overlay out of React Flow's internal child tree and into the measured canvas wrapper so screen-space cursor coordinates render at the correct position.
+- Verified the cursor position fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Made the measured canvas wrapper a relative overflow-hidden positioning context so the absolute live cursor overlay uses the same origin as cursor measurements.
+- Verified the cursor overlay positioning fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Memoized React Flow node and edge type maps inside the synced canvas component to keep stable prop identities and remove the React Flow new `nodeTypes`/`edgeTypes` warning.
+- Verified the React Flow type map warning fix with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: implement `context/feature-specs/20-ai-sidebar-shell.md`.
+- Next steps: extract the AI sidebar into a controlled floating component, add AI Architect and Specs tabs, wire local chat shell interactions, update documented color token mappings if needed, then run format, lint, and build.
+- Open questions: none.
+- Added `AIWorkspaceSidebar` as a controlled floating right-side editor component with header, close button, shadcn tabs, AI Architect chat shell, starter prompt chips, Enter-to-send textarea behavior, and a static Specs tab card.
+- Replaced the inline AI placeholder in the editor workspace with the new sidebar while preserving parent-owned open/close state.
+- Added the documented project color token mappings to `globals.css` so `bg-base`, `bg-elevated`, `bg-subtle`, `border-surface-border`, text, brand, and accent text utilities resolve consistently.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: implement `context/feature-specs/21-canvas-auto-save.md`.
+- Reused the existing `Project.canvasJsonPath` field for canvas blob metadata.
+- Installed `@vercel/blob` for Vercel Blob canvas JSON storage.
+- Added typed canvas snapshot validation and `GET`/`PUT /api/projects/[projectId]/canvas` with Clerk project access checks, Blob read/write, and Prisma URL persistence.
+- Added a debounced `useCanvasAutosave` hook that watches collaborative nodes and edges and reports `saving`, `saved`, or `error`.
+- Loaded saved canvas JSON into an empty Liveblocks room only after confirming the active room has no nodes or edges, preserving active collaboration state.
+- Added a small disabled Save status control in the editor navbar for autosave state.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Fixed canvas Blob persistence for private stores by saving with `access: "private"` and loading saved canvas JSON through authenticated `@vercel/blob` `get`.
+- Verified private Blob write/read/delete with the `.env.local` `BLOB_READ_WRITE_TOKEN`.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Updated editor navbar text and controls to use the white primary copy token.
+- Verified with `pnpm format` and `pnpm lint`.
+- Changed the editor Save control from a disabled status pill into a manual save button that shows `Saving`, shows `Saved` briefly, then returns to `Save`.
+- Kept debounced autosave active while allowing manual retry/save requests through the same canvas persistence route.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Increased the canvas autosave debounce window to 3 seconds so saves wait until the user stops changing the canvas.
+- Removed normal save request aborts from the autosave hook; overlapping save requests are now coalesced to the latest queued canvas snapshot instead of cancelling in-flight PUTs.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Paused canvas save scheduling while nodes or selections are being dragged so save requests are only sent after shape movement stops and the debounce window completes.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Added global pointer/mouse/touch/blur release fallbacks so autosave cannot remain paused if React Flow misses a drag-stop callback.
+- Fixed the autosave hook to persist the first non-empty snapshot after saved-canvas loading, covering edits made before the load request finishes.
+- Verified with `pnpm format`, `pnpm lint`, and `npm run build`.
+- Next steps: wire AI generation against the persisted canvas once the generation spec is active.
+- Open questions: none.
+- Current goal: add a light mode theme using the existing dark theme token model and expose a theme toggle in the editor navbar.
+- Next steps: add light-mode CSS token values, implement a persisted navbar theme toggle, update UI context, then run `pnpm format` and `pnpm lint`.
+- Open questions: none.
+- Added light-mode theme tokens, a persisted editor navbar theme toggle, and UI context documentation for dual-theme support.
+- Updated canvas node rendering, drag previews, and starter template previews to resolve stored dark node colors to light-mode display colors when the light theme is active.
+- Next steps: run `pnpm format`, `pnpm lint`, and build verification.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: wire AI generation against the persisted canvas once the generation spec is active.
+- Open questions: none.
+- Current goal: keep editor navbar text white across light and dark themes.
+- Added a semantic `navbar-text` color token and applied it to editor navbar text, icon buttons, and navbar actions.
+- Next steps: run `pnpm format` and `pnpm lint`.
+- Open questions: none.
+- Fixed light-mode navbar contrast by adding dark `navbar-bg`, `navbar-border`, `navbar-control`, and `navbar-control-hover` tokens and applying them to the editor navbar controls.
+- Fixed the light-mode navbar title color by restoring `text-navbar-text` on the navbar slots and project title, and removed the sidebar toggle fill in light mode.
+- Current goal: verify and address review comments for feature specs, canvas persistence, AI sidebar accessibility, theme initialization, and autosave dependencies.
+- Renamed the AI sidebar shell feature spec to `20-ai-sidebar-shell.md` and updated the tracked reference.
+- Updated the canvas autosave spec to use `/hooks` and `pnpm run build`.
+- Updated canvas blob saves to write a unique new blob before changing the Prisma pointer, then clean up old/new blobs after DB success/failure.
+- Broadened canvas node color validation to match the current custom-color-capable `NodeColor` type.
+- Added token aliases for existing `bg-base`, `bg-subtle`, and `bg-elevated` classes.
+- Made the closed AI sidebar inert and pointer-inactive.
+- Made theme toggle updates pure and added a before-paint theme initialization script.
+- Removed redundant autosave effect dependencies.
