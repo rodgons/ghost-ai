@@ -312,3 +312,10 @@
 - Completed review finding verification and fixed the still-valid issues in Trigger skill docs, feature specs, Prisma schema, AI design run persistence/token auth, AI chat persistence, prompt validation, sidebar send state, and Liveblocks canvas snapshot reads.
 - Added migration `20260603002000_add_ai_chat_role_enum_and_task_run_project_index` and regenerated the Prisma client; local migration application is still pending because Postgres was unreachable at `localhost:5432`.
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: verify and fix review comments for CodeRabbit Prisma review coverage, design run idempotency, and AI chat duplicate handling.
+- Next steps: remove the broad Prisma ignore, store a stable TaskRun idempotency key, handle AI chat duplicate IDs at create time, regenerate Prisma client, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Removed the broad CodeRabbit `prisma/**` ignore so schema and migration SQL remain reviewed.
+- Added stored unique `TaskRun.idempotencyKey` values derived deterministically from user, project, room, and prompt, and passed that stored key to Trigger.
+- Removed the AI chat duplicate pre-check and now translate create-time Prisma `P2002` message ID conflicts to 409 responses.
+- Added migration `20260603100000_add_task_run_idempotency_key`, regenerated the Prisma client, and verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
