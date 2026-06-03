@@ -1,4 +1,5 @@
 import { clerkClient } from "@clerk/nextjs/server";
+import { Prisma } from "@/generated/prisma/client";
 import { getCursorColorForUser } from "@/lib/liveblocks";
 import prisma from "@/lib/prisma";
 import {
@@ -60,6 +61,15 @@ function toChatMessagePayload(message: {
   };
 }
 
+function isMessageIdConflict(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002" &&
+    Array.isArray(error.meta?.target) &&
+    error.meta.target.includes("id")
+  );
+}
+
 export async function GET(_request: Request, { params }: AiChatRouteContext) {
   const { projectId } = await params;
   const access = await verifyProjectAccess(projectId);
@@ -101,34 +111,35 @@ export async function POST(request: Request, { params }: AiChatRouteContext) {
     return new Response(null, { status: 403 });
   }
 
-  const existingMessage = await prisma.aiChatMessage.findUnique({
-    where: { id: message.id },
-    select: { id: true },
-  });
-
-  if (existingMessage) {
-    return new Response(null, { status: 409 });
-  }
-
   const client = await clerkClient();
   const clerkUser = await client.users.getUser(access.identity.userId);
-  const savedMessage = await prisma.aiChatMessage.create({
-    data: {
-      content: message.content,
-      id: message.id,
-      projectId,
-      role: "user",
-      senderAvatarUrl: clerkUser.imageUrl,
-      senderCursorColor: getCursorColorForUser(access.identity.userId),
-      senderDisplayName:
-        clerkUser.fullName ??
-        clerkUser.username ??
-        access.identity.email ??
-        "User",
-      senderId: access.identity.userId,
-      sentAt: new Date(),
-    },
-  });
+  let savedMessage: Awaited<ReturnType<typeof prisma.aiChatMessage.create>>;
+
+  try {
+    savedMessage = await prisma.aiChatMessage.create({
+      data: {
+        content: message.content,
+        id: message.id,
+        projectId,
+        role: "user",
+        senderAvatarUrl: clerkUser.imageUrl,
+        senderCursorColor: getCursorColorForUser(access.identity.userId),
+        senderDisplayName:
+          clerkUser.fullName ??
+          clerkUser.username ??
+          access.identity.email ??
+          "User",
+        senderId: access.identity.userId,
+        sentAt: new Date(),
+      },
+    });
+  } catch (error) {
+    if (isMessageIdConflict(error)) {
+      return new Response(null, { status: 409 });
+    }
+
+    throw error;
+  }
 
   return Response.json({
     message: toChatMessagePayload(savedMessage),
