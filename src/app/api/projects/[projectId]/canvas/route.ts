@@ -1,11 +1,4 @@
-import {
-  BlobNotFoundError,
-  BlobPreconditionFailedError,
-  del,
-  get,
-  head,
-  put,
-} from "@vercel/blob";
+import { del, get, put } from "@vercel/blob";
 import { isCanvasSnapshot } from "@/lib/canvas-snapshot";
 import prisma from "@/lib/prisma";
 import {
@@ -60,30 +53,37 @@ export async function GET(_request: Request, { params }: CanvasRouteContext) {
     return Response.json({ canvas: null });
   }
 
-  const blob = await get(project.canvasJsonPath, {
-    access: "private",
-    useCache: false,
-  });
+  try {
+    const blob = await get(project.canvasJsonPath, {
+      access: "private",
+      useCache: false,
+    });
 
-  if (!blob || blob.statusCode !== 200) {
+    if (!blob) {
+      return Response.json(
+        { error: "Saved canvas could not be loaded." },
+        { status: 502 },
+      );
+    }
+
+    const savedCanvas: unknown = await new Response(blob.stream)
+      .json()
+      .catch(() => null);
+
+    if (!isCanvasSnapshot(savedCanvas)) {
+      return Response.json(
+        { error: "Saved canvas is not valid." },
+        { status: 502 },
+      );
+    }
+
+    return Response.json({ canvas: savedCanvas });
+  } catch {
     return Response.json(
       { error: "Saved canvas could not be loaded." },
       { status: 502 },
     );
   }
-
-  const savedCanvas: unknown = await new Response(blob.stream)
-    .json()
-    .catch(() => null);
-
-  if (!isCanvasSnapshot(savedCanvas)) {
-    return Response.json(
-      { error: "Saved canvas is not valid." },
-      { status: 502 },
-    );
-  }
-
-  return Response.json({ canvas: savedCanvas });
 }
 
 export async function PUT(request: Request, { params }: CanvasRouteContext) {
@@ -109,68 +109,35 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
     return Response.json({ error: "Invalid canvas JSON." }, { status: 400 });
   }
 
-  let savedBlob: Awaited<ReturnType<typeof put>>;
-  const currentCanvasPath = project.canvasJsonPath;
-  let currentCanvasEtag: string | undefined;
+  const savePath = `canvas/${projectId}.json`;
+  let savedBlob: Awaited<ReturnType<typeof put>> | undefined;
 
   try {
-    const uploadOptions: Parameters<typeof put>[2] = {
+    savedBlob = await put(savePath, JSON.stringify(canvas), {
       access: "private",
+      allowOverwrite: true,
       contentType: "application/json",
-    };
+    });
 
-    if (currentCanvasPath) {
-      try {
-        const metadata = await head(currentCanvasPath);
-        currentCanvasEtag = metadata.etag;
-      } catch (error: unknown) {
-        if (!(error instanceof BlobNotFoundError)) {
-          throw error;
-        }
-      }
-    }
-
-    savedBlob = await put(
-      `canvas/${projectId}-${Date.now()}-${crypto.randomUUID()}.json`,
-      JSON.stringify(canvas),
-      uploadOptions,
-    );
-  } catch (error: unknown) {
-    if (error instanceof BlobPreconditionFailedError) {
-      return Response.json(
-        { error: "Canvas save conflict. Please retry." },
-        { status: 409 },
-      );
-    }
-
-    throw error;
-  }
-
-  try {
     await prisma.project.update({
       where: { id: projectId },
       data: { canvasJsonPath: savedBlob.url },
       select: { id: true },
     });
-  } catch (error: unknown) {
-    await del(savedBlob.url).catch(() => null);
 
-    throw error;
-  }
-
-  if (currentCanvasPath && currentCanvasPath !== savedBlob.url) {
-    await del(
-      currentCanvasPath,
-      currentCanvasEtag ? { ifMatch: currentCanvasEtag } : undefined,
-    ).catch((error: unknown) => {
-      if (
-        error instanceof BlobNotFoundError ||
-        error instanceof BlobPreconditionFailedError
-      ) {
-        return;
+    return Response.json({ canvasJsonPath: savedBlob.url });
+  } catch (error) {
+    if (savedBlob) {
+      try {
+        await del(savePath);
+      } catch (cleanupError) {
+        console.error("Failed to remove orphan canvas blob:", cleanupError);
       }
-    });
-  }
+    }
 
-  return Response.json({ canvasJsonPath: savedBlob.url });
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Canvas save failed." },
+      { status: 500 },
+    );
+  }
 }

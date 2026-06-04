@@ -95,7 +95,6 @@ import {
 import type { CanvasTemplate } from "./starter-templates";
 
 interface CollaborativeCanvasProps {
-  manualSaveRequestId: number;
   onSaveStatusChange: (status: CanvasSaveStatus) => void;
   projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
@@ -1078,19 +1077,16 @@ function isRecordWithCanvas(
 }
 
 function SyncedCanvas({
-  manualSaveRequestId,
   onSaveStatusChange,
   projectId,
   templateImportRequest,
 }: {
-  manualSaveRequestId: number;
   onSaveStatusChange: (status: CanvasSaveStatus) => void;
   projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
 }) {
   const [dragPreview, setDragPreview] = useState<DragPreviewState | null>(null);
   const [hasCheckedSavedCanvas, setHasCheckedSavedCanvas] = useState(false);
-  const [isMovingShapes, setIsMovingShapes] = useState(false);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
   const lastTemplateImportIdRef = useRef<number | null>(null);
   const latestCanvasCountsRef = useRef({ edges: 0, nodes: 0 });
@@ -1126,11 +1122,10 @@ function SyncedCanvas({
       ),
     [edges],
   );
-  const { saveNow, status: saveStatus } = useCanvasAutosave({
+  const saveStatus = useCanvasAutosave({
     edges: directedEdges,
     enabled: hasCheckedSavedCanvas,
     nodes,
-    paused: isMovingShapes,
     projectId,
   });
   const addCanvasSnapshot = useCallback(
@@ -1154,42 +1149,6 @@ function SyncedCanvas({
   useEffect(() => {
     onSaveStatusChange(saveStatus);
   }, [onSaveStatusChange, saveStatus]);
-
-  useEffect(() => {
-    if (manualSaveRequestId === 0) {
-      return;
-    }
-
-    if (isMovingShapes) {
-      return;
-    }
-
-    saveNow();
-  }, [isMovingShapes, manualSaveRequestId, saveNow]);
-
-  useEffect(() => {
-    if (!isMovingShapes) {
-      return;
-    }
-
-    const stopMoving = () => {
-      setIsMovingShapes(false);
-    };
-
-    window.addEventListener("blur", stopMoving);
-    window.addEventListener("mouseup", stopMoving);
-    window.addEventListener("pointerup", stopMoving);
-    window.addEventListener("touchend", stopMoving);
-    window.addEventListener("touchcancel", stopMoving);
-
-    return () => {
-      window.removeEventListener("blur", stopMoving);
-      window.removeEventListener("mouseup", stopMoving);
-      window.removeEventListener("pointerup", stopMoving);
-      window.removeEventListener("touchend", stopMoving);
-      window.removeEventListener("touchcancel", stopMoving);
-    };
-  }, [isMovingShapes]);
 
   useEffect(() => {
     latestCanvasCountsRef.current = {
@@ -1473,7 +1432,6 @@ function SyncedCanvas({
 
   const startMovingShapes = useCallback<OnNodeDrag<CanvasNode>>(
     (event) => {
-      setIsMovingShapes(true);
       updateCursorFromClientPosition(event);
     },
     [updateCursorFromClientPosition],
@@ -1481,7 +1439,6 @@ function SyncedCanvas({
 
   const stopMovingShapes = useCallback<OnNodeDrag<CanvasNode>>(
     (event) => {
-      setIsMovingShapes(false);
       updateCursorFromClientPosition(event);
     },
     [updateCursorFromClientPosition],
@@ -1489,7 +1446,6 @@ function SyncedCanvas({
 
   const startSelectionMove = useCallback(
     (event: MouseEvent<Element>) => {
-      setIsMovingShapes(true);
       updateCursorFromClientPosition(event);
     },
     [updateCursorFromClientPosition],
@@ -1497,7 +1453,6 @@ function SyncedCanvas({
 
   const stopSelectionMove = useCallback(
     (event: MouseEvent<Element>) => {
-      setIsMovingShapes(false);
       updateCursorFromClientPosition(event);
     },
     [updateCursorFromClientPosition],
@@ -1566,7 +1521,6 @@ function SyncedCanvas({
 }
 
 export function CollaborativeCanvas({
-  manualSaveRequestId,
   onSaveStatusChange,
   projectId,
   templateImportRequest,
@@ -1577,7 +1531,6 @@ export function CollaborativeCanvas({
         <ClientSideSuspense fallback={<CanvasLoading />}>
           <ReactFlowProvider>
             <SyncedCanvas
-              manualSaveRequestId={manualSaveRequestId}
               onSaveStatusChange={onSaveStatusChange}
               projectId={projectId}
               templateImportRequest={templateImportRequest}
