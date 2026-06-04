@@ -156,3 +156,166 @@
 - Made the closed AI sidebar inert and pointer-inactive.
 - Made theme toggle updates pure and added a before-paint theme initialization script.
 - Removed redundant autosave effect dependencies.
+- Current goal: add Trigger.dev project scaffolding.
+- Added Trigger.dev package dependencies and root `trigger.config.ts` pointing at `src/trigger`.
+- Added `trigger-health-check` as the first exported Trigger task so the worker has a concrete registered task.
+- Documented local Trigger worker startup in `README.md`.
+- Verified with `pnpm format`, `pnpm lint`, and Trigger dev worker registration.
+- Next steps: replace the health-check task with scoped AI generation/spec generation tasks when those feature specs are active.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/22-design-agent-api.md`.
+- Next steps: add TaskRun persistence, create the design Trigger task, add authenticated design trigger/token API routes, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Added Prisma `TaskRun` persistence with unique `runId`, project/user ownership fields, run lookup index, and user/project compound index.
+- Added the minimal `design-agent` Trigger.dev task in `src/trigger/design-agent.ts` with typed `prompt` and `roomId` payload echoing/logging only.
+- Added `POST /api/ai/design` with request validation, room/project match enforcement, Clerk project access checks, Trigger task dispatch, TaskRun creation, and `{ runId }` response.
+- Added `POST /api/ai/design/token` with TaskRun ownership verification and a run-scoped Trigger public read token.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: wire the AI sidebar client to the design API when the UI integration spec is active.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/23-design-agent-logic.md`.
+- Next steps: add Liveblocks room status events, render AI status/presence in the canvas, update the design agent task to generate and apply validated canvas actions with Gemini, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Added Liveblocks room status events plus canvas overlays for design-agent status messages, AI cursor presence, and visible thinking state.
+- Replaced the placeholder `design-agent` Trigger task with Gemini structured planning, validated canvas actions, Liveblocks React Flow server mutations, status publishing, AI presence updates, and failure cleanup.
+- Next steps: run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: wire the AI sidebar client to display run progress when the UI integration spec is active.
+- Current goal: fix dark-theme create-project modal input text contrast.
+- Added `text-foreground` to the shared input component so modal input values inherit the active theme foreground instead of rendering black in dark mode.
+- Next steps: run `pnpm format` and `pnpm lint`.
+- Verified with `pnpm format` and `pnpm lint`.
+- Current goal: fix local Trigger design-agent environment loading.
+- Loaded `.env.local` from `trigger.config.ts` before Trigger discovers task modules so local `trigger dev` runs can read `GEMINI_API_KEY` and other task secrets.
+- Documented local Trigger env loading in `README.md`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Current goal: diagnose and fix slow `design-agent` Trigger runs after `context/feature-specs/23-design-agent-logic.md`.
+- Found recent Trigger dev runs timing out with `MAX_DURATION_EXCEEDED`; the timed-out trace only reached the task-start log, indicating the run was hanging before Gemini planning, likely in the first Liveblocks status/presence call.
+- Added bounded Liveblocks and Gemini operation timeouts, granular task logs around each external operation, task-level `maxDuration`, and `AbortTaskRunError` handling so deterministic integration failures fail quickly instead of retrying until the run appears stuck.
+- A fresh dev run then showed an intermittent Liveblocks status event failure; changed AI status and presence publishing to best-effort so non-critical UI updates do not abort design generation.
+- A later dev run reached Gemini and timed out after 90 seconds; simplified the structured-output schema from a large `oneOf` action union to a lightweight action object schema, while keeping strict TypeScript sanitization before Liveblocks mutation.
+- Found a likely canvas-apply sanitizer issue: generated edges were validated against only the original snapshot node IDs and could be dropped if the model emitted edges before generated nodes, or if generated node IDs were normalized before edge references were resolved.
+- Updated design-agent action sanitization to process generated nodes first, map raw node IDs to sanitized node IDs, then validate edge endpoints against the combined original/generated node set.
+- Added Trigger trace logging for raw vs sanitized action counts and restored `AbortTaskRunError` on task failure so deterministic failures do not retry and look stuck.
+- Found that the design agent was using `gemini-3.5-flash`, which is not a current Gemini API model code; current Google model docs list stable codes such as `gemini-2.5-flash`, `gemini-2.5-flash-lite`, and `gemini-2.0-flash`.
+- Switched the design agent to `gemini-2.0-flash` and capped structured output tokens so the planning call can complete quickly and reach Liveblocks canvas mutation.
+- A fresh Trigger dev run failed fast with a Gemini quota error for `gemini-2.0-flash`, confirming the current blocker is the Google API key/model quota, not Trigger.dev or Liveblocks canvas mutation.
+- Made the Gemini model configurable with `DESIGN_AGENT_MODEL`, changed the default to the current low-latency `gemini-2.5-flash-lite`, and disabled AI SDK internal retries so quota failures surface immediately.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: configure a Gemini model with available quota/billing in `.env.local`, restart Trigger dev, run a fresh design-agent task test, and confirm the trace reaches `Liveblocks apply canvas actions` with nonzero sanitized/applied counts.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/24-ai-presence-state.md`.
+- Added typed `ai-status-feed` payload validation in `types/tasks.ts` with optional `text` support.
+- Updated Liveblocks room event typing and design-agent status publishing to use the shared `ai-status-feed` event.
+- Lifted the Liveblocks room provider to the editor workspace so the collaborative canvas and AI sidebar share the same room presence/events.
+- Added sidebar AI activity state from shared room presence plus latest validated feed message; chat input and starter prompt chips disable while AI is working, and the send button shows a loading state.
+- Updated the canvas status overlay to consume the validated shared feed and show only the most recent message.
+- Added thinking spinners to live cursor name badges when participant presence has `thinking: true`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: wire actual AI generation trigger UI in a later feature spec.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/25-sidebar-chat-feed.md`.
+- Added a separate room-scoped `ai-chat` Liveblocks event feed distinct from `ai-status-feed`.
+- Added `aiChatMessageSchema` in `types/tasks.ts` using Zod, covering sender, role, content, and timestamp validation before rendering chat messages.
+- Wired the AI sidebar chat area to subscribe to validated `ai-chat` messages, render messages in timestamp order, and show sender, timestamp, and content.
+- Wired the existing sidebar input and send button to broadcast user messages to `ai-chat`, clear after successful send, and show a small error if sending fails.
+- Added `zod` as a direct project dependency because the feature spec requires a Zod schema in app code.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: add AI-generated replies only when a later feature spec calls for backend AI task triggering.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/26-design-agent-frontend.md`.
+- Next steps: wire sidebar prompt submission to `/api/ai/design`, subscribe to the returned Trigger run with `useRealtimeRun`, keep chat/status updates collaborative through Liveblocks feeds, and run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Wired the AI Architect sidebar prompt submission to broadcast the user message to `ai-chat`, call `POST /api/ai/design` with `{ prompt, roomId }`, and store the returned `runId` plus `publicToken`.
+- Added Trigger Realtime run tracking in the sidebar with `useRealtimeRun(runId, { accessToken: publicToken })`, disabling input during active runs and broadcasting final success/failure assistant messages back to `ai-chat`.
+- Kept canvas synchronization fully Liveblocks-driven by relying on the existing `useLiveblocksFlow` setup and not adding any frontend node/edge sync.
+- Scoped the compact `ai-status-feed` strip to active design runs only, while retaining shared AI presence in the sidebar header.
+- Updated `/api/ai/design` to support the frontend contract by accepting room-scoped requests without a separate project id and returning a run-scoped Trigger public token with the `runId`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: run a browser/manual multi-session smoke test with Trigger dev and Liveblocks connected to confirm collaborative chat and canvas updates in a real room.
+- Open questions: none.
+- Current goal: fix `TaskRun` table missing error after `context/feature-specs/26-design-agent-frontend.md`.
+- Found the local database had not applied migration `20260603000000_add_task_runs`, so `/api/ai/design` could trigger the design-agent run and then fail while persisting `TaskRun`.
+- Applied the pending Prisma migration to the local Postgres database with `pnpm prisma migrate dev`.
+- Added a defensive `TaskRun` storage readiness check before Trigger dispatch so a missing migration returns a clear API error without starting a design run.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry the AI sidebar prompt in the editor; the route should now persist the run and return `{ runId, publicToken }`.
+- Open questions: none.
+- Current goal: fix design-agent shape variety, edge labels, and directional edge handles.
+- Next steps: improve the design-agent prompt to use semantic shapes and labeled arrows, derive default edge handles from node geometry when the model omits them, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Added semantic shape guidance for the design agent so architecture concepts map to circles, rectangles, pills, diamonds, cylinders, and hexagons instead of defaulting to rectangles.
+- Required every new AI edge to include a meaningful short label and added a sanitizer fallback label for under-specified model output.
+- Added deterministic edge handle derivation from node geometry so vertical connections use bottom-to-top or top-to-bottom and horizontal connections use side handles.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry the chat architecture prompt and confirm generated Pub/Sub/storage/database nodes use varied shapes and arrows attach from the nearest sides.
+- Open questions: none.
+- Current goal: make the design agent use node colors semantically.
+- Next steps: add color semantics to the design-agent prompt, add a deterministic color fallback for generated nodes, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Added prompt guidance for semantic node colors across actors, services, gateways, security, media, storage, and infrastructure roles.
+- Added a deterministic generated-node color fallback based on node label and shape when the model omits `colorIndex`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry the architecture prompt and confirm generated nodes use varied semantic colors alongside varied shapes and labeled arrows.
+- Open questions: none.
+- Current goal: make generated edge connections follow the diagram flow path.
+- Next steps: stop preserving model-provided edge handles for generated edges, always derive handles from source/target geometry, clarify prompt guidance, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Changed generated AI edges to always use geometry-derived handles instead of preserving model-provided handles, so connections follow the upstream-to-downstream path.
+- Clarified design-agent prompt guidance to avoid forcing every connection to bottom or right and to connect from the side facing the downstream node.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry the architecture prompt and confirm arrows attach from top/left/right/bottom according to the actual flow path.
+- Open questions: none.
+- Current goal: make generated arrow labels appear only for meaningful information.
+- Next steps: remove generic edge label fallbacks, drop low-information model labels, update prompt guidance, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Removed the generic `connects` fallback label from generated AI edges.
+- Added generated edge label sanitization that drops low-information labels like connects, link, flow, data, request, response, and message.
+- Updated design-agent prompt guidance so edge labels are optional and only used for meaningful protocol, action, or data-flow detail.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry the architecture prompt and confirm only informative labels such as WebSocket, publish, subscribe, read/write, or stores media are shown.
+- Open questions: none.
+- Current goal: fix AI Architect chat horizontal overflow while a run is active.
+- Next steps: constrain the sidebar/chat flex layout, wrap long chat text, keep the active-run status strip within bounds, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Constrained the AI Architect sidebar, tabs, chat list, status strip, and composer with `min-w-0`, `max-w-full`, and hidden horizontal overflow so active-run UI cannot widen the panel.
+- Added wrapping/overflow guards to chat bubbles so long prompts or status text stay inside the sidebar while the AI Architect is running.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry a long AI Architect prompt and confirm the chat stays within the sidebar during the full run.
+- Open questions: none.
+- Current goal: auto-dismiss on-canvas Trigger/AI status messages after 5 seconds.
+- Next steps: replace the current stale-message timer with a strict 5-second clear for the displayed status message, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Updated the canvas AI status overlay to dismiss the currently displayed message after 5 seconds while preserving any newer status message that arrives before the timer fires.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry an AI Architect run and confirm each on-canvas status message disappears after 5 seconds.
+- Open questions: none.
+- Current goal: persist AI Architect chat conversation history.
+- Next steps: add project-scoped chat message persistence, expose authenticated chat history API routes, load/save sidebar messages while keeping Liveblocks events for realtime delivery, update storage docs, then run Prisma migration/generation and `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Added `AiChatMessage` relational persistence scoped to projects, with cascade delete and indexes for project history and sender/project lookup.
+- Added authenticated `GET`/`POST /api/projects/[projectId]/ai-chat` routes that enforce project access, return saved history, and upsert messages by id.
+- Updated the AI Architect sidebar to load saved chat history on room entry and persist user, assistant, completion, and error messages while retaining Liveblocks `ai-chat` events for realtime delivery.
+- Updated the architecture storage context to include project-scoped AI chat history in PostgreSQL.
+- Generated the Prisma client and applied migration `20260603001000_add_ai_chat_messages` to the local Postgres database.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: reload an editor room after sending AI Architect messages and confirm the conversation history is restored.
+- Open questions: none.
+- Current goal: fix stale Prisma development singleton after adding AI chat persistence.
+- Next steps: make the shared Prisma client recreate itself when the cached development instance does not expose the new `aiChatMessage` delegate, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Updated the shared Prisma client singleton to recreate the development client when the cached instance does not expose the current generated delegates, fixing stale `prisma.aiChatMessage` access after schema generation.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: retry saving an AI Architect chat message; the route should now see `prisma.aiChatMessage`.
+- Open questions: none.
+- Completed review finding verification and fixed the still-valid issues in Trigger skill docs, feature specs, Prisma schema, AI design run persistence/token auth, AI chat persistence, prompt validation, sidebar send state, and Liveblocks canvas snapshot reads.
+- Added migration `20260603002000_add_ai_chat_role_enum_and_task_run_project_index` and regenerated the Prisma client; local migration application is still pending because Postgres was unreachable at `localhost:5432`.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: verify and fix review comments for CodeRabbit Prisma review coverage, design run idempotency, and AI chat duplicate handling.
+- Next steps: remove the broad Prisma ignore, store a stable TaskRun idempotency key, handle AI chat duplicate IDs at create time, regenerate Prisma client, then run `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Removed the broad CodeRabbit `prisma/**` ignore so schema and migration SQL remain reviewed.
+- Added stored unique `TaskRun.idempotencyKey` values derived deterministically from user, project, room, and prompt, and passed that stored key to Trigger.
+- Removed the AI chat duplicate pre-check and now translate create-time Prisma `P2002` message ID conflicts to 409 responses.
+- Added migration `20260603100000_add_task_run_idempotency_key`, regenerated the Prisma client, and verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.

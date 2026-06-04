@@ -16,6 +16,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Background Tasks
+
+This project uses Trigger.dev for durable background tasks. Task files live in `src/trigger`, and the root `trigger.config.ts` points the Trigger worker at that directory.
+
+Set `TRIGGER_SECRET_KEY` in your local environment. Trigger dev also loads `.env.local`, where task dependencies such as `GEMINI_API_KEY`, `LIVEBLOCKS_SECRET_KEY`, and `BLOB_READ_WRITE_TOKEN` can be defined.
+
+Then run:
+
+```bash
+pnpm exec trigger dev
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

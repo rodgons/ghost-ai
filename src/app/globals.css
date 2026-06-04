@@ -114,11 +114,12 @@
   --text-secondary: #454b57;
   --text-muted: #697283;
   --text-faint: #9aa3b1;
-  --navbar-bg: rgba(17, 17, 20, 0.96);
-  --navbar-border: rgba(42, 42, 48, 0.9);
-  --navbar-control: rgba(24, 24, 28, 0.88);
-  --navbar-control-hover: rgba(30, 30, 35, 0.96);
-  --navbar-text: #ffffff;
+  /* Light theme navbar colors */
+  --navbar-bg: rgba(255, 255, 255, 0.9);
+  --navbar-border: rgba(211, 218, 229, 0.9);
+  --navbar-control: rgba(245, 247, 250, 0.9);
+  --navbar-control-hover: rgba(226, 233, 242, 0.96);
+  --navbar-text: #14161b;
   --accent-primary: #00c8d4;
   --accent-primary-dim: rgba(0, 200, 212, 0.16);
   --accent-ai: #6457f9;
