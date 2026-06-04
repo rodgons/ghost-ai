@@ -1,4 +1,4 @@
-import { get, put } from "@vercel/blob";
+import { del, get, put } from "@vercel/blob";
 import { isCanvasSnapshot } from "@/lib/canvas-snapshot";
 import prisma from "@/lib/prisma";
 import {
@@ -109,21 +109,35 @@ export async function PUT(request: Request, { params }: CanvasRouteContext) {
     return Response.json({ error: "Invalid canvas JSON." }, { status: 400 });
   }
 
-  const savedBlob = await put(
-    `canvas/${projectId}.json`,
-    JSON.stringify(canvas),
-    {
+  const savePath = `canvas/${projectId}.json`;
+  let savedBlob: Awaited<ReturnType<typeof put>> | undefined;
+
+  try {
+    savedBlob = await put(savePath, JSON.stringify(canvas), {
       access: "private",
       allowOverwrite: true,
       contentType: "application/json",
-    },
-  );
+    });
 
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { canvasJsonPath: savedBlob.url },
-    select: { id: true },
-  });
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { canvasJsonPath: savedBlob.url },
+      select: { id: true },
+    });
 
-  return Response.json({ canvasJsonPath: savedBlob.url });
+    return Response.json({ canvasJsonPath: savedBlob.url });
+  } catch (error) {
+    if (savedBlob) {
+      try {
+        await del(savePath);
+      } catch (cleanupError) {
+        console.error("Failed to remove orphan canvas blob:", cleanupError);
+      }
+    }
+
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Canvas save failed." },
+      { status: 500 },
+    );
+  }
 }

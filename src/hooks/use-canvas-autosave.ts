@@ -26,7 +26,8 @@ export function useCanvasAutosave({
 }: UseCanvasAutosaveOptions) {
   const [status, setStatus] = useState<CanvasSaveStatus>("idle");
   const lastSavedSnapshotRef = useRef<string | null>(null);
-  const saveTimeoutRef = useRef<number | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveControllerRef = useRef<AbortController | null>(null);
   const snapshot = useMemo<CanvasSnapshot>(
     () => ({ nodes, edges }),
     [nodes, edges],
@@ -41,12 +42,13 @@ export function useCanvasAutosave({
       return;
     }
 
-    window.clearTimeout(saveTimeoutRef.current);
+    globalThis.clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = null;
   }, []);
 
   useEffect(() => {
     if (!enabled) {
+      saveControllerRef.current?.abort();
       clearSaveTimeout();
       return;
     }
@@ -56,28 +58,54 @@ export function useCanvasAutosave({
     }
 
     clearSaveTimeout();
-    saveTimeoutRef.current = window.setTimeout(() => {
+    saveControllerRef.current?.abort();
+
+    const requestSnapshot = serializedSnapshot;
+    const controller = new AbortController();
+    saveControllerRef.current = controller;
+
+    saveTimeoutRef.current = globalThis.setTimeout(() => {
+      if (controller.signal.aborted) {
+        return;
+      }
+
       setStatus("saving");
 
       fetch(`/api/projects/${projectId}/canvas`, {
-        body: serializedSnapshot,
+        body: requestSnapshot,
         headers: { "Content-Type": "application/json" },
         method: "PUT",
+        signal: controller.signal,
       })
         .then((response) => {
           if (!response.ok) {
             throw new Error("Canvas save failed.");
           }
 
-          lastSavedSnapshotRef.current = serializedSnapshot;
+          if (
+            controller.signal.aborted ||
+            saveControllerRef.current !== controller
+          ) {
+            return;
+          }
+
+          lastSavedSnapshotRef.current = requestSnapshot;
           setStatus("saved");
         })
-        .catch(() => {
+        .catch((_error) => {
+          if (
+            controller.signal.aborted ||
+            saveControllerRef.current !== controller
+          ) {
+            return;
+          }
+
           setStatus("error");
         });
     }, AUTOSAVE_DEBOUNCE_MS);
 
     return () => {
+      controller.abort();
       clearSaveTimeout();
     };
   }, [clearSaveTimeout, enabled, projectId, serializedSnapshot]);
