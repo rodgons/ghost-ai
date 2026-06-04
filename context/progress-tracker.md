@@ -319,3 +319,11 @@
 - Added stored unique `TaskRun.idempotencyKey` values derived deterministically from user, project, room, and prompt, and passed that stored key to Trigger.
 - Removed the AI chat duplicate pre-check and now translate create-time Prisma `P2002` message ID conflicts to 409 responses.
 - Added migration `20260603100000_add_task_run_idempotency_key`, regenerated the Prisma client, and verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: rewrite `context/feature-specs/21-canvas-auto-save.md` exactly as specified without preserving the existing autosave implementation.
+- Replaced the canvas save/load route with direct authenticated Prisma metadata lookup plus Vercel Blob JSON read/write at `canvas/{projectId}.json`.
+- Replaced the autosave hook with a focused debounced watcher for collaborative nodes and edges that reports `saving`, `saved`, and `error`.
+- Kept saved canvas loading guarded so it only imports persisted JSON when the Liveblocks room is empty.
+- Simplified the editor Save button into a disabled status indicator driven by autosave state.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: manually verify saved canvas reload behavior in a real editor room with Vercel Blob credentials.
+- Open questions: none.

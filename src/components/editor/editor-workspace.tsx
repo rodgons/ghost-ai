@@ -45,7 +45,6 @@ export function EditorWorkspace({
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [canvasSaveStatus, setCanvasSaveStatus] =
     useState<CanvasSaveStatus>("idle");
-  const [manualSaveRequestId, setManualSaveRequestId] = useState(0);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [templateImportRequest, setTemplateImportRequest] =
@@ -81,10 +80,7 @@ export function EditorWorkspace({
           <div className="flex items-center gap-2">
             <Button
               aria-live="polite"
-              disabled={canvasSaveStatus === "saving"}
-              onClick={() =>
-                setManualSaveRequestId((requestId) => requestId + 1)
-              }
+              disabled
               size="sm"
               variant="outline"
               className={
@@ -147,7 +143,6 @@ export function EditorWorkspace({
               <ClientSideSuspense fallback={<SharedRoomLoading />}>
                 <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
                   <CollaborativeCanvas
-                    manualSaveRequestId={manualSaveRequestId}
                     onSaveStatusChange={setCanvasSaveStatus}
                     projectId={projectId}
                     templateImportRequest={templateImportRequest}
