@@ -1044,7 +1044,7 @@ function SpecsTab({
         type="button"
         onClick={handleGenerateSpec}
         disabled={isGenerating || isRunActive}
-        className="w-full bg-brand text-navbar-text hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isGenerating || isRunActive ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

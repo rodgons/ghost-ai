@@ -54,3 +54,19 @@ test("Specs tab constrains generated spec content inside the sidebar", () => {
     /<p\s+className="whitespace-pre-wrap break-words text-sm leading-6"\s+key=\{key\}\s+>/,
   );
 });
+
+test("Generate Spec button uses the shared default button colors", () => {
+  const sidebarSource = readFileSync(
+    "src/components/editor/ai-workspace-sidebar.tsx",
+    "utf8",
+  );
+  const generateSpecButtonMatch = sidebarSource.match(
+    /<Button[\s\S]*?onClick=\{handleGenerateSpec\}[\s\S]*?className="([^"]*)"[\s\S]*?>/,
+  );
+
+  assert.ok(generateSpecButtonMatch);
+  assert.equal(
+    generateSpecButtonMatch[1],
+    "w-full disabled:cursor-not-allowed disabled:opacity-60",
+  );
+});

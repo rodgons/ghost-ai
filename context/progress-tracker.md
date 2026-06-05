@@ -378,3 +378,13 @@
 - Added regression coverage for Specs tab overflow guards in `tests/spec-ui-integration.test.ts`.
 - Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm lint`, and `pnpm format`.
 - Open questions: none.
+- Current goal: change the Specs tab Generate Spec button to use the shared default button colors.
+- Removed the custom brand color classes from the Generate Spec button while keeping its full-width layout and disabled styling.
+- Added regression coverage that asserts the Generate Spec button uses shared default button colors.
+- Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm lint`, and `pnpm format`.
+- Open questions: none.
+- Current goal: fix the Create Project modal title color in dark mode.
+- Added explicit `text-foreground` styling to the Create Project `DialogTitle` so it remains visible in dark mode without changing shared dialog foundation components.
+- Added regression coverage for the Create Project dialog title foreground token in `tests/project-dialogs.test.ts`.
+- Verified with `node --experimental-strip-types tests/project-dialogs.test.ts`, `pnpm lint`, and `pnpm format`.
+- Open questions: none.
