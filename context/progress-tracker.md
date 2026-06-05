@@ -334,6 +334,7 @@
 - Added the `generate-spec` Trigger task using Gemini through `@ai-sdk/google`, Trigger metadata status updates, Markdown-only task output, retries, logging, and fail-fast `AbortTaskRunError` handling.
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: wire frontend spec generation UI and final spec persistence when those feature specs are active.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
 - Open questions: none.
 - Current goal: implement `context/feature-specs/28-spec-persistence-download.md`.
 - Added `ProjectSpec` metadata persistence with project relation, Blob file path, creation timestamp, project/date index, migration `20260604000000_add_project_specs`, and regenerated Prisma client support.
@@ -341,6 +342,7 @@
 - Added `GET /api/projects/[projectId]/specs/[specId]/download` with Clerk authentication, project access verification, project-scoped spec lookup, private Blob fetch, and Markdown attachment response.
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: apply the new Prisma migration to local/production databases before running spec persistence end to end.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
 - Open questions: none.
 - Current goal: fix local Prisma schema mismatch causing `TaskRun.idempotencyKey` column-not-found errors.
 - Found the local database was missing pending migrations `20260603100000_add_task_run_idempotency_key` and `20260604000000_add_project_specs` while the generated Prisma client expected both schemas.
@@ -368,6 +370,7 @@
 - Added project-scoped specs metadata and Markdown preview routes at `GET /api/projects/[projectId]/specs` and `GET /api/projects/[projectId]/specs/[specId]`, reusing authenticated project access checks and private Blob reads.
 - Replaced the static Specs tab card with a compact generated spec list, Markdown preview dialog, and download actions using the existing download endpoint.
 - Added focused source-level regression coverage in `tests/spec-ui-integration.test.ts` for the button/API wiring.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
 - Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: run an authenticated browser smoke test with Trigger dev, Gemini, Blob, and the local database available to confirm a generated spec appears in the list after the run completes.
 - Open questions: none.

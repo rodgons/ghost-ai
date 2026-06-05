@@ -54,12 +54,18 @@ export async function GET(
     if (!blob) {
       return Response.json(
         { error: "Generated spec could not be loaded." },
-        { status: 502 },
+        {
+          status: 502,
+          headers: {
+            "Cache-Control": "private, no-store",
+          },
+        },
       );
     }
 
     return new Response(blob.stream, {
       headers: {
+        "Cache-Control": "private, no-store",
         "Content-Disposition": `attachment; filename="${getDownloadFilename(specId)}"`,
         "Content-Type": "text/markdown; charset=utf-8",
       },

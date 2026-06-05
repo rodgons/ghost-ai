@@ -1154,8 +1154,12 @@ function SyncedCanvas({
   }, [onSaveStatusChange, saveStatus]);
 
   useEffect(() => {
+    if (!hasCheckedSavedCanvas) {
+      return;
+    }
+
     onCanvasSnapshotChange({ edges: directedEdges, nodes });
-  }, [directedEdges, nodes, onCanvasSnapshotChange]);
+  }, [directedEdges, hasCheckedSavedCanvas, nodes, onCanvasSnapshotChange]);
 
   useEffect(() => {
     latestCanvasCountsRef.current = {

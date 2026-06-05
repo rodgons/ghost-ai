@@ -18,6 +18,8 @@ export function createCanvasAutosaveScheduler({
 }: CanvasAutosaveSchedulerOptions): CanvasAutosaveScheduler {
   let disposed = false;
   let timeout: ReturnType<typeof setTimeout> | null = null;
+  let inFlightSave = false;
+  let latestPendingSnapshot: string | null = null;
 
   const clearScheduledSave = () => {
     if (timeout === null) {
@@ -28,33 +30,53 @@ export function createCanvasAutosaveScheduler({
     timeout = null;
   };
 
+  const triggerSave = async () => {
+    timeout = null;
+
+    if (disposed || latestPendingSnapshot === null) {
+      return;
+    }
+
+    const snapshotToSave = latestPendingSnapshot;
+    latestPendingSnapshot = null;
+    inFlightSave = true;
+    onStatusChange("saving");
+
+    try {
+      await save(snapshotToSave);
+      if (!disposed) {
+        onStatusChange("saved");
+      }
+    } catch {
+      if (!disposed) {
+        onStatusChange("error");
+      }
+    } finally {
+      inFlightSave = false;
+
+      if (!disposed && latestPendingSnapshot !== null) {
+        timeout = setTimeout(triggerSave, delayMs);
+      }
+    }
+  };
+
   return {
     dispose: () => {
       disposed = true;
       clearScheduledSave();
+      latestPendingSnapshot = null;
     },
     schedule: (snapshot) => {
       if (disposed) {
         return;
       }
 
+      latestPendingSnapshot = snapshot;
       clearScheduledSave();
-      timeout = setTimeout(() => {
-        timeout = null;
-        onStatusChange("saving");
 
-        save(snapshot)
-          .then(() => {
-            if (!disposed) {
-              onStatusChange("saved");
-            }
-          })
-          .catch(() => {
-            if (!disposed) {
-              onStatusChange("error");
-            }
-          });
-      }, delayMs);
+      if (!inFlightSave) {
+        timeout = setTimeout(triggerSave, delayMs);
+      }
     },
   };
 }

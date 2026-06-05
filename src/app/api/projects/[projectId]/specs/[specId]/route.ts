@@ -54,15 +54,27 @@ export async function GET(
     if (!blob) {
       return Response.json(
         { error: "Generated spec could not be loaded." },
-        { status: 502 },
+        {
+          status: 502,
+          headers: {
+            "Cache-Control": "private, no-store",
+          },
+        },
       );
     }
 
-    return Response.json({
-      content: await new Response(blob.stream).text(),
-      filename: getSpecFilename(spec.id),
-      id: spec.id,
-    });
+    return Response.json(
+      {
+        content: await new Response(blob.stream).text(),
+        filename: getSpecFilename(spec.id),
+        id: spec.id,
+      },
+      {
+        headers: {
+          "Cache-Control": "private, no-store",
+        },
+      },
+    );
   } catch {
     return Response.json(
       { error: "Generated spec could not be loaded." },
