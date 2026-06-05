@@ -17,7 +17,7 @@ function createClient() {
 }
 
 function hasCurrentGeneratedDelegates(client: PrismaClient) {
-  return "aiChatMessage" in client;
+  return "aiChatMessage" in client && "projectSpec" in client;
 }
 
 if (process.env.NODE_ENV === "development") {

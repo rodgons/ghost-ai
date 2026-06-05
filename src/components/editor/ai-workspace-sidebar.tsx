@@ -18,11 +18,21 @@ import {
   useState,
 } from "react";
 import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import type { designAgent } from "~/trigger/design-agent";
-import { NODE_COLORS } from "../../../types/canvas";
+import type { generateSpec } from "~/trigger/generate-spec";
+import { type CanvasSnapshot, NODE_COLORS } from "../../../types/canvas";
 import {
   AI_CHAT_FEED_NAME,
   AI_STATUS_FEED_NAME,
@@ -33,12 +43,18 @@ import {
 } from "../../../types/tasks";
 
 interface AIWorkspaceSidebarProps {
+  canvasSnapshot: CanvasSnapshot;
   isOpen: boolean;
   onClose: () => void;
   roomId: string;
 }
 
 interface ActiveDesignRun {
+  publicToken: string;
+  runId: string;
+}
+
+interface ActiveSpecRun {
   publicToken: string;
   runId: string;
 }
@@ -50,6 +66,30 @@ interface DesignAgentApiResponse {
 
 interface AiChatHistoryResponse {
   messages: AiChatMessagePayload[];
+}
+
+interface SpecGenerationApiResponse {
+  runId: string;
+}
+
+interface SpecRunTokenApiResponse {
+  token: string;
+}
+
+interface ProjectSpecListItem {
+  createdAt: string;
+  filename: string;
+  id: string;
+}
+
+interface ProjectSpecsResponse {
+  specs: ProjectSpecListItem[];
+}
+
+interface ProjectSpecPreviewResponse {
+  content: string;
+  filename: string;
+  id: string;
 }
 
 const AI_CHAT_ACCENT = NODE_COLORS[6];
@@ -187,6 +227,56 @@ function isDesignAgentApiResponse(
   );
 }
 
+function isSpecGenerationApiResponse(
+  value: unknown,
+): value is SpecGenerationApiResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).runId === "string" &&
+    Boolean((value as Record<string, unknown>).runId)
+  );
+}
+
+function isSpecRunTokenApiResponse(
+  value: unknown,
+): value is SpecRunTokenApiResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).token === "string" &&
+    Boolean((value as Record<string, unknown>).token)
+  );
+}
+
+function isProjectSpecsResponse(value: unknown): value is ProjectSpecsResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as Record<string, unknown>).specs) &&
+    (value as { specs: unknown[] }).specs.every(
+      (spec) =>
+        typeof spec === "object" &&
+        spec !== null &&
+        typeof (spec as Record<string, unknown>).id === "string" &&
+        typeof (spec as Record<string, unknown>).filename === "string" &&
+        typeof (spec as Record<string, unknown>).createdAt === "string",
+    )
+  );
+}
+
+function isProjectSpecPreviewResponse(
+  value: unknown,
+): value is ProjectSpecPreviewResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).id === "string" &&
+    typeof (value as Record<string, unknown>).filename === "string" &&
+    typeof (value as Record<string, unknown>).content === "string"
+  );
+}
+
 function readApiError(value: unknown) {
   if (
     typeof value === "object" &&
@@ -197,6 +287,87 @@ function readApiError(value: unknown) {
   }
 
   return "Ghost AI could not start the design run.";
+}
+
+function formatSpecTimestamp(timestamp: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(timestamp));
+}
+
+function hashMarkdownBlock(value: string) {
+  let hash = 0;
+
+  for (const character of value) {
+    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  }
+
+  return hash.toString(36);
+}
+
+function renderMarkdownPreview(content: string) {
+  const seenBlocks = new Map<string, number>();
+
+  return content.split(/\n{2,}/).map((block) => {
+    const trimmedBlock = block.trim();
+
+    if (!trimmedBlock) {
+      return null;
+    }
+
+    const blockHash = hashMarkdownBlock(trimmedBlock);
+    const occurrence = seenBlocks.get(blockHash) ?? 0;
+    const key = `${blockHash}-${occurrence}`;
+
+    seenBlocks.set(blockHash, occurrence + 1);
+
+    if (trimmedBlock.startsWith("### ")) {
+      return (
+        <h4 className="text-sm font-semibold text-primary-text" key={key}>
+          {trimmedBlock.slice(4)}
+        </h4>
+      );
+    }
+
+    if (trimmedBlock.startsWith("## ")) {
+      return (
+        <h3 className="text-base font-semibold text-primary-text" key={key}>
+          {trimmedBlock.slice(3)}
+        </h3>
+      );
+    }
+
+    if (trimmedBlock.startsWith("# ")) {
+      return (
+        <h2 className="text-lg font-semibold text-primary-text" key={key}>
+          {trimmedBlock.slice(2)}
+        </h2>
+      );
+    }
+
+    if (trimmedBlock.startsWith("- ")) {
+      return (
+        <ul
+          className="list-disc space-y-1 break-words pl-5 text-sm leading-6"
+          key={key}
+        >
+          {trimmedBlock.split("\n").map((line) => (
+            <li key={line}>{line.replace(/^-\s*/, "")}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+      <p
+        className="whitespace-pre-wrap break-words text-sm leading-6"
+        key={key}
+      >
+        {trimmedBlock}
+      </p>
+    );
+  });
 }
 
 function normalizeRunStatus(status: unknown) {
@@ -676,47 +847,318 @@ function AIArchitectTab({
   );
 }
 
-function SpecsTab() {
+function SpecsTab({
+  canvasSnapshot,
+  roomId,
+}: {
+  canvasSnapshot: CanvasSnapshot;
+  roomId: string;
+}) {
+  const [activeRun, setActiveRun] = useState<ActiveSpecRun | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingSpecs, setIsLoadingSpecs] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [preview, setPreview] = useState<ProjectSpecPreviewResponse | null>(
+    null,
+  );
+  const [specs, setSpecs] = useState<ProjectSpecListItem[]>([]);
+  const specsApiUrl = `/api/projects/${encodeURIComponent(roomId)}/specs`;
+  const isRunActive = Boolean(activeRun);
+
+  const loadSpecs = useCallback(async () => {
+    setIsLoadingSpecs(true);
+
+    try {
+      const response = await fetch(specsApiUrl);
+      const responseBody: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(readApiError(responseBody));
+      }
+
+      if (!isProjectSpecsResponse(responseBody)) {
+        throw new Error("Generated specs response was invalid.");
+      }
+
+      setSpecs(responseBody.specs);
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Generated specs could not be loaded.",
+      );
+    } finally {
+      setIsLoadingSpecs(false);
+    }
+  }, [specsApiUrl]);
+
+  const { error: realtimeError } = useRealtimeRun<typeof generateSpec>(
+    activeRun?.runId,
+    {
+      accessToken: activeRun?.publicToken,
+      enabled: Boolean(activeRun),
+      onComplete: (run, runError) => {
+        setActiveRun(null);
+        setIsGenerating(false);
+
+        if (runError || normalizeRunStatus(run.status) !== "COMPLETED") {
+          setError(
+            runError?.message ??
+              "Spec generation failed. Check the Trigger.dev run for details.",
+          );
+          return;
+        }
+
+        void loadSpecs();
+      },
+    },
+  );
+
+  useEffect(() => {
+    void loadSpecs();
+  }, [loadSpecs]);
+
+  useEffect(() => {
+    if (!activeRun || !realtimeError) {
+      return;
+    }
+
+    setActiveRun(null);
+    setIsGenerating(false);
+    setError(realtimeError.message);
+  }, [activeRun, realtimeError]);
+
+  const loadChatHistoryForSpec = async () => {
+    const response = await fetch(
+      `/api/projects/${encodeURIComponent(roomId)}/ai-chat`,
+    );
+    const responseBody: unknown = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(readApiError(responseBody));
+    }
+
+    if (!isAiChatHistoryResponse(responseBody)) {
+      throw new Error("Saved chat history is invalid.");
+    }
+
+    return responseBody.messages.map((message) => ({
+      content: message.content,
+      role: message.role,
+    }));
+  };
+
+  const handleGenerateSpec = async () => {
+    if (isGenerating || isRunActive) {
+      return;
+    }
+
+    setError(null);
+    setIsGenerating(true);
+
+    try {
+      const chatHistory = await loadChatHistoryForSpec();
+      const response = await fetch("/api/ai/spec", {
+        body: JSON.stringify({
+          chatHistory,
+          edges: canvasSnapshot.edges,
+          nodes: canvasSnapshot.nodes,
+          roomId,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const responseBody: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(readApiError(responseBody));
+      }
+
+      if (!isSpecGenerationApiResponse(responseBody)) {
+        throw new Error("Spec generation returned an invalid run.");
+      }
+
+      const tokenResponse = await fetch("/api/ai/spec/token", {
+        body: JSON.stringify({ runId: responseBody.runId }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const tokenBody: unknown = await tokenResponse.json().catch(() => null);
+
+      if (!tokenResponse.ok) {
+        throw new Error(readApiError(tokenBody));
+      }
+
+      if (!isSpecRunTokenApiResponse(tokenBody)) {
+        throw new Error("Spec generation returned an invalid run token.");
+      }
+
+      setActiveRun({ publicToken: tokenBody.token, runId: responseBody.runId });
+    } catch (generateError) {
+      setIsGenerating(false);
+      setError(
+        generateError instanceof Error
+          ? generateError.message
+          : "Spec generation could not be started.",
+      );
+    }
+  };
+
+  const openPreview = async (specId: string) => {
+    setError(null);
+    setIsPreviewLoading(true);
+
+    try {
+      const response = await fetch(
+        `${specsApiUrl}/${encodeURIComponent(specId)}`,
+      );
+      const responseBody: unknown = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(readApiError(responseBody));
+      }
+
+      if (!isProjectSpecPreviewResponse(responseBody)) {
+        throw new Error("Generated spec preview was invalid.");
+      }
+
+      setPreview(responseBody);
+    } catch (previewError) {
+      setError(
+        previewError instanceof Error
+          ? previewError.message
+          : "Generated spec could not be opened.",
+      );
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  const downloadUrl = (specId: string) =>
+    `${specsApiUrl}/${encodeURIComponent(specId)}/download`;
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
+    <div className="flex min-h-0 min-w-0 max-w-full flex-1 flex-col gap-3 overflow-hidden">
       <Button
         type="button"
-        className="w-full bg-brand text-white hover:bg-brand/90"
+        onClick={handleGenerateSpec}
+        disabled={isGenerating || isRunActive}
+        className="w-full bg-brand text-navbar-text hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <FileText className="h-4 w-4" aria-hidden="true" />
-        Generate Spec
+        {isGenerating || isRunActive ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <FileText className="h-4 w-4" aria-hidden="true" />
+        )}
+        {isGenerating || isRunActive ? "Generating" : "Generate Spec"}
       </Button>
 
-      <SidebarSection className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-dim text-brand">
-            <FileText className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-medium text-primary-text">
-              System Architecture Spec
-            </h3>
-            <p className="mt-1 line-clamp-3 text-sm leading-6 text-muted-text">
-              Overview, component responsibilities, data flow, and operational
-              notes generated from the current canvas.
-            </p>
-          </div>
+      {error ? (
+        <p className="rounded-xl border border-surface-border bg-elevated px-3 py-2 text-xs break-words text-error">
+          {error}
+        </p>
+      ) : null}
+
+      <SidebarSection className="min-h-0 min-w-0 flex-1 overflow-hidden p-3">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
+          <h3 className="text-sm font-medium text-primary-text">
+            Generated specs
+          </h3>
+          {isLoadingSpecs ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-text" />
+          ) : null}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled
-          className="mt-4 w-full border-surface-border text-muted-text"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          Download
-        </Button>
+
+        <ScrollArea className="h-full min-w-0 max-w-full overflow-hidden pr-2">
+          {specs.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-surface-border bg-subtle p-4 text-sm leading-6 text-muted-text">
+              No generated specs yet. Generate one from the current canvas.
+            </div>
+          ) : (
+            <div className="min-w-0 max-w-full space-y-2 overflow-hidden">
+              {specs.map((spec) => (
+                <div
+                  className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-surface-border bg-subtle p-3"
+                  key={spec.id}
+                >
+                  <button
+                    type="button"
+                    onClick={() => void openPreview(spec.id)}
+                    className="flex w-full min-w-0 items-start gap-3 text-left"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-dim text-brand">
+                      <FileText className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-primary-text">
+                        {spec.filename}
+                      </span>
+                      <span className="mt-1 block text-xs text-muted-text">
+                        {formatSpecTimestamp(spec.createdAt)}
+                      </span>
+                    </span>
+                  </button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-3 w-full border-surface-border text-muted-text"
+                    asChild
+                    nativeButton={false}
+                  >
+                    <a href={downloadUrl(spec.id)}>
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                      Download
+                    </a>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
       </SidebarSection>
+
+      <Dialog
+        open={Boolean(preview)}
+        onOpenChange={(open) => !open && setPreview(null)}
+      >
+        <DialogContent className="max-h-[min(44rem,calc(100vh-2rem))] max-w-3xl overflow-hidden rounded-3xl border border-surface-border bg-base text-copy-primary">
+          <DialogHeader>
+            <DialogTitle>{preview?.filename ?? "Generated spec"}</DialogTitle>
+            <DialogDescription>
+              {preview ? "Preview the generated Markdown technical spec." : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[min(30rem,calc(100vh-15rem))] min-w-0 max-w-full overflow-hidden rounded-2xl border border-surface-border bg-elevated p-4">
+            {isPreviewLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-text">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Loading preview...
+              </div>
+            ) : (
+              <div className="min-w-0 max-w-full space-y-4 overflow-hidden text-copy-primary">
+                {preview ? renderMarkdownPreview(preview.content) : null}
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter className="border-surface-border bg-elevated">
+            {preview ? (
+              <Button variant="outline" asChild nativeButton={false}>
+                <a href={downloadUrl(preview.id)}>
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  Download
+                </a>
+              </Button>
+            ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 export function AIWorkspaceSidebar({
+  canvasSnapshot,
   isOpen,
   onClose,
   roomId,
@@ -804,7 +1246,7 @@ export function AIWorkspaceSidebar({
             value="specs"
             className="mt-0 flex min-h-0 min-w-0 flex-1 overflow-hidden"
           >
-            <SpecsTab />
+            <SpecsTab canvasSnapshot={canvasSnapshot} roomId={roomId} />
           </TabsContent>
         </Tabs>
       </aside>

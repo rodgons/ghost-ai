@@ -95,6 +95,7 @@ import {
 import type { CanvasTemplate } from "./starter-templates";
 
 interface CollaborativeCanvasProps {
+  onCanvasSnapshotChange: (snapshot: CanvasSnapshot) => void;
   onSaveStatusChange: (status: CanvasSaveStatus) => void;
   projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
@@ -1077,10 +1078,12 @@ function isRecordWithCanvas(
 }
 
 function SyncedCanvas({
+  onCanvasSnapshotChange,
   onSaveStatusChange,
   projectId,
   templateImportRequest,
 }: {
+  onCanvasSnapshotChange: (snapshot: CanvasSnapshot) => void;
   onSaveStatusChange: (status: CanvasSaveStatus) => void;
   projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
@@ -1149,6 +1152,10 @@ function SyncedCanvas({
   useEffect(() => {
     onSaveStatusChange(saveStatus);
   }, [onSaveStatusChange, saveStatus]);
+
+  useEffect(() => {
+    onCanvasSnapshotChange({ edges: directedEdges, nodes });
+  }, [directedEdges, nodes, onCanvasSnapshotChange]);
 
   useEffect(() => {
     latestCanvasCountsRef.current = {
@@ -1521,6 +1528,7 @@ function SyncedCanvas({
 }
 
 export function CollaborativeCanvas({
+  onCanvasSnapshotChange,
   onSaveStatusChange,
   projectId,
   templateImportRequest,
@@ -1531,6 +1539,7 @@ export function CollaborativeCanvas({
         <ClientSideSuspense fallback={<CanvasLoading />}>
           <ReactFlowProvider>
             <SyncedCanvas
+              onCanvasSnapshotChange={onCanvasSnapshotChange}
               onSaveStatusChange={onSaveStatusChange}
               projectId={projectId}
               templateImportRequest={templateImportRequest}

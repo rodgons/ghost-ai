@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CanvasEdge,
   CanvasNode,
   CanvasSnapshot,
 } from "../../types/canvas";
+import { createCanvasAutosaveScheduler } from "./canvas-autosave-scheduler";
 
 export type CanvasSaveStatus = "idle" | "saved" | "saving" | "error";
 
@@ -25,9 +26,9 @@ export function useCanvasAutosave({
   projectId,
 }: UseCanvasAutosaveOptions) {
   const [status, setStatus] = useState<CanvasSaveStatus>("idle");
-  const lastSavedSnapshotRef = useRef<string | null>(null);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const saveControllerRef = useRef<AbortController | null>(null);
+  const schedulerRef = useRef<ReturnType<
+    typeof createCanvasAutosaveScheduler
+  > | null>(null);
   const snapshot = useMemo<CanvasSnapshot>(
     () => ({ nodes, edges }),
     [nodes, edges],
@@ -37,84 +38,38 @@ export function useCanvasAutosave({
     [snapshot],
   );
 
-  const clearSaveTimeout = useCallback(() => {
-    if (saveTimeoutRef.current === null) {
-      return;
-    }
+  useEffect(() => {
+    const scheduler = createCanvasAutosaveScheduler({
+      delayMs: AUTOSAVE_DEBOUNCE_MS,
+      onStatusChange: (nextStatus) => setStatus(nextStatus),
+      save: async (snapshotToSave) => {
+        const response = await fetch(`/api/projects/${projectId}/canvas`, {
+          body: snapshotToSave,
+          headers: { "Content-Type": "application/json" },
+          method: "PUT",
+        });
 
-    globalThis.clearTimeout(saveTimeoutRef.current);
-    saveTimeoutRef.current = null;
-  }, []);
+        if (!response.ok) {
+          throw new Error("Canvas save failed.");
+        }
+      },
+    });
+
+    schedulerRef.current = scheduler;
+
+    return () => {
+      scheduler.dispose();
+      schedulerRef.current = null;
+    };
+  }, [projectId]);
 
   useEffect(() => {
     if (!enabled) {
-      saveControllerRef.current?.abort();
-      clearSaveTimeout();
       return;
     }
 
-    if (lastSavedSnapshotRef.current === serializedSnapshot) {
-      return;
-    }
-
-    clearSaveTimeout();
-    saveControllerRef.current?.abort();
-
-    const requestSnapshot = serializedSnapshot;
-    const controller = new AbortController();
-    saveControllerRef.current = controller;
-
-    saveTimeoutRef.current = globalThis.setTimeout(() => {
-      if (controller.signal.aborted) {
-        return;
-      }
-
-      setStatus("saving");
-
-      fetch(`/api/projects/${projectId}/canvas`, {
-        body: requestSnapshot,
-        headers: { "Content-Type": "application/json" },
-        method: "PUT",
-        signal: controller.signal,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Canvas save failed.");
-          }
-
-          if (
-            controller.signal.aborted ||
-            saveControllerRef.current !== controller
-          ) {
-            return;
-          }
-
-          lastSavedSnapshotRef.current = requestSnapshot;
-          setStatus("saved");
-        })
-        .catch((_error) => {
-          if (
-            controller.signal.aborted ||
-            saveControllerRef.current !== controller
-          ) {
-            return;
-          }
-
-          setStatus("error");
-        });
-    }, AUTOSAVE_DEBOUNCE_MS);
-
-    return () => {
-      controller.abort();
-      clearSaveTimeout();
-    };
-  }, [clearSaveTimeout, enabled, projectId, serializedSnapshot]);
-
-  useEffect(() => {
-    return () => {
-      clearSaveTimeout();
-    };
-  }, [clearSaveTimeout]);
+    schedulerRef.current?.schedule(serializedSnapshot);
+  }, [enabled, serializedSnapshot]);
 
   return status;
 }
