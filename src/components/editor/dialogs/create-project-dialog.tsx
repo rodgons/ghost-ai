@@ -51,7 +51,7 @@ export function CreateProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
+          <DialogTitle className="text-foreground">Create Project</DialogTitle>
           <DialogDescription>
             Create a new architecture workspace.
           </DialogDescription>

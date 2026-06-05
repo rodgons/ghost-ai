@@ -17,6 +17,7 @@ import {
 import { Button } from "~/components/ui/button";
 import type { CanvasSaveStatus } from "~/hooks/use-canvas-autosave";
 import { useProjectDialogs } from "~/hooks/use-project-dialogs";
+import type { CanvasSnapshot } from "../../../types/canvas";
 import { AIWorkspaceSidebar } from "./ai-workspace-sidebar";
 import {
   type CanvasTemplateImportRequest,
@@ -45,6 +46,10 @@ export function EditorWorkspace({
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
   const [canvasSaveStatus, setCanvasSaveStatus] =
     useState<CanvasSaveStatus>("idle");
+  const [canvasSnapshot, setCanvasSnapshot] = useState<CanvasSnapshot>({
+    edges: [],
+    nodes: [],
+  });
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [templateImportRequest, setTemplateImportRequest] =
@@ -143,12 +148,14 @@ export function EditorWorkspace({
               <ClientSideSuspense fallback={<SharedRoomLoading />}>
                 <div className="flex min-h-[calc(100vh-3.5rem)] flex-1">
                   <CollaborativeCanvas
+                    onCanvasSnapshotChange={setCanvasSnapshot}
                     onSaveStatusChange={setCanvasSaveStatus}
                     projectId={projectId}
                     templateImportRequest={templateImportRequest}
                   />
 
                   <AIWorkspaceSidebar
+                    canvasSnapshot={canvasSnapshot}
                     isOpen={aiSidebarOpen}
                     onClose={() => setAiSidebarOpen(false)}
                     roomId={projectId}

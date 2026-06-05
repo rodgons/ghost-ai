@@ -33,6 +33,7 @@ model Project {
   updatedAt        DateTime        @updatedAt
   aiChatMessages   AiChatMessage[]
   collaborators    ProjectCollaborator[]
+  specs            ProjectSpec[]
   taskRuns         TaskRun[]
 
   @@index([ownerId, createdAt])
@@ -78,4 +79,14 @@ model AiChatMessage {
 
   @@index([projectId, sentAt])
   @@index([senderId, projectId])
+}
+
+model ProjectSpec {
+  id        String   @id @default(uuid())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
 }

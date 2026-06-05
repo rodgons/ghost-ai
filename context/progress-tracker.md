@@ -327,3 +327,67 @@
 - Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: manually verify saved canvas reload behavior in a real editor room with Vercel Blob credentials.
 - Open questions: none.
+- Current goal: implement `context/feature-specs/27-spec-generation-flow.md`.
+- Added Zod-backed spec generation request/task validation for `roomId`, `chatHistory`, `nodes`, and `edges` without accepting client-provided project IDs.
+- Added `POST /api/ai/spec` with Clerk authentication, room-derived project access checks, `generate-spec` dispatch, and `TaskRun` ownership persistence returning `{ runId }`.
+- Added `POST /api/ai/spec/token` with authenticated run-owner verification and 1-hour Trigger.dev run-scoped public token issuance.
+- Added the `generate-spec` Trigger task using Gemini through `@ai-sdk/google`, Trigger metadata status updates, Markdown-only task output, retries, logging, and fail-fast `AbortTaskRunError` handling.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: wire frontend spec generation UI and final spec persistence when those feature specs are active.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/28-spec-persistence-download.md`.
+- Added `ProjectSpec` metadata persistence with project relation, Blob file path, creation timestamp, project/date index, migration `20260604000000_add_project_specs`, and regenerated Prisma client support.
+- Updated `generate-spec` to upload generated Markdown to private Vercel Blob at `specs/{projectId}/{specId}.md`, create the linked `ProjectSpec` record, expose `specId` and `filePath` in Trigger metadata, and keep Markdown as the task output.
+- Added `GET /api/projects/[projectId]/specs/[specId]/download` with Clerk authentication, project access verification, project-scoped spec lookup, private Blob fetch, and Markdown attachment response.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: apply the new Prisma migration to local/production databases before running spec persistence end to end.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
+- Open questions: none.
+- Current goal: fix local Prisma schema mismatch causing `TaskRun.idempotencyKey` column-not-found errors.
+- Found the local database was missing pending migrations `20260603100000_add_task_run_idempotency_key` and `20260604000000_add_project_specs` while the generated Prisma client expected both schemas.
+- Updated `prisma.config.ts` to load `.env.local` so Prisma CLI commands use the same local database credentials as the app.
+- Applied the pending migrations with `pnpm prisma migrate dev` and regenerated the Prisma client.
+- Next steps: rerun the AI design/spec trigger flow in the browser against the now-updated local database.
+- Open questions: none.
+- Current goal: fix canvas autosave regression after the latest committed autosave changes.
+- Added a focused autosave queue regression test proving that only the latest queued snapshot is saved after an in-flight save completes.
+- Replaced abort-on-change autosave behavior with a latest-only save queue so stale client aborts cannot race newer snapshots and overwrite current canvas state.
+- Removed stable canvas blob deletion on Prisma update failure so a failed metadata write cannot erase the existing saved canvas blob.
+- Verified with the autosave queue test, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: manually smoke test an editor room by moving/adding nodes rapidly, waiting for `Saved`, then reloading to confirm the latest canvas persists.
+- Open questions: none.
+- Current goal: reimplement `context/feature-specs/21-canvas-auto-save.md` exactly as specified and replace the prior autosave queue behavior.
+- Added a focused debounced autosave scheduler test covering latest-snapshot debounce and saving/saved/error status reporting.
+- Replaced the queue-based autosave helper with a simpler debounced scheduler used by `useCanvasAutosave` to save canvas snapshots through `PUT /api/projects/[projectId]/canvas`.
+- Confirmed the project schema already supports the canvas blob URL through `Project.canvasJsonPath`, and the installed `@vercel/blob` dependency and existing save/load route remain aligned with the feature spec.
+- Verified with `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: manually smoke test an editor room by editing the canvas, waiting for `Saved`, then reloading an empty Liveblocks room to confirm the saved Blob snapshot loads without overwriting active room state.
+- Open questions: none.
+- Current goal: implement `context/feature-specs/29-spec-ui-integration.md` so the Specs tab Generate Spec button works end to end.
+- Added current canvas snapshot propagation from the collaborative canvas into the AI workspace sidebar so spec generation submits the active nodes and edges.
+- Wired the Specs tab Generate Spec button to load saved chat history, call `POST /api/ai/spec`, request the run token, monitor `generate-spec` through Trigger Realtime, and refresh generated specs after completion.
+- Added project-scoped specs metadata and Markdown preview routes at `GET /api/projects/[projectId]/specs` and `GET /api/projects/[projectId]/specs/[specId]`, reusing authenticated project access checks and private Blob reads.
+- Replaced the static Specs tab card with a compact generated spec list, Markdown preview dialog, and download actions using the existing download endpoint.
+- Added focused source-level regression coverage in `tests/spec-ui-integration.test.ts` for the button/API wiring.
+- Documentation reconciliation: project-overview.md unchanged, architecture-context.md unchanged, ui-context.md unchanged, code-standards.md unchanged, ai-workflow-rules.md unchanged.
+- Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: run an authenticated browser smoke test with Trigger dev, Gemini, Blob, and the local database available to confirm a generated spec appears in the list after the run completes.
+- Open questions: none.
+- Fixed the Specs tab download links to set `nativeButton={false}` when rendering anchors through the shared Base UI `Button asChild` wrapper, removing the Base UI native button semantics warning.
+- Added regression coverage for the Base UI anchor opt-out and verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Current goal: fix AI Workspace Specs tab horizontal overflow when generated specs exist.
+- Added width and overflow constraints to the Specs tab containers, generated spec list, scroll areas, and Markdown preview content so long generated filenames or spec text cannot widen the sidebar.
+- Added regression coverage for Specs tab overflow guards in `tests/spec-ui-integration.test.ts`.
+- Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm lint`, and `pnpm format`.
+- Open questions: none.
+- Current goal: change the Specs tab Generate Spec button to use the shared default button colors.
+- Removed the custom brand color classes from the Generate Spec button while keeping its full-width layout and disabled styling.
+- Added regression coverage that asserts the Generate Spec button uses shared default button colors.
+- Verified with `node --experimental-strip-types tests/spec-ui-integration.test.ts`, `pnpm lint`, and `pnpm format`.
+- Open questions: none.
+- Current goal: fix the Create Project modal title color in dark mode.
+- Added explicit `text-foreground` styling to the Create Project `DialogTitle` so it remains visible in dark mode without changing shared dialog foundation components.
+- Added regression coverage for the Create Project dialog title foreground token in `tests/project-dialogs.test.ts`.
+- Verified with `node --experimental-strip-types tests/project-dialogs.test.ts`, `pnpm lint`, and `pnpm format`.
+- Open questions: none.
