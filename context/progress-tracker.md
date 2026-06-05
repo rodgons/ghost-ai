@@ -391,3 +391,9 @@
 - Added regression coverage for the Create Project dialog title foreground token in `tests/project-dialogs.test.ts`.
 - Verified with `node --experimental-strip-types tests/project-dialogs.test.ts`, `pnpm lint`, and `pnpm format`.
 - Open questions: none.
+- Current goal: fix browser warnings from `SyncedCanvas` hook dependencies and React Flow type maps.
+- Added a React compiler opt-out directive to `SyncedCanvas` so compiler-generated memo dependencies cannot expand variable-length `nodes` and `edges` arrays between renders.
+- Passed module-scoped `canvasNodeTypes` and `canvasEdgeTypes` directly to React Flow instead of wrapping them in local memo variables.
+- Added regression coverage in `tests/collaborative-canvas-warnings.test.ts` for the compiler opt-out and module-scoped React Flow type maps.
+- Verified with `node --experimental-strip-types tests/collaborative-canvas-warnings.test.ts`, `pnpm lint`, `pnpm format`, and `pnpm run build`.
+- Open questions: none.

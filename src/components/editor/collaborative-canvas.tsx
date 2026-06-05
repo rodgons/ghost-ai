@@ -1088,6 +1088,8 @@ function SyncedCanvas({
   projectId: string;
   templateImportRequest: CanvasTemplateImportRequest | null;
 }) {
+  "use no memo";
+
   const [dragPreview, setDragPreview] = useState<DragPreviewState | null>(null);
   const [hasCheckedSavedCanvas, setHasCheckedSavedCanvas] = useState(false);
   const canvasViewportRef = useRef<HTMLDivElement>(null);
@@ -1098,8 +1100,6 @@ function SyncedCanvas({
   const updateMyPresence = useUpdateMyPresence();
   const reactFlow = useReactFlow<CanvasNode, CanvasEdge>();
   const { screenToFlowPosition } = reactFlow;
-  const stableNodeTypes = useMemo(() => canvasNodeTypes, []);
-  const stableEdgeTypes = useMemo(() => canvasEdgeTypes, []);
   const { nodes, edges, onNodesChange, onEdgesChange, onDelete } =
     useLiveblocksFlow<CanvasNode, CanvasEdge>({
       suspense: true,
@@ -1481,8 +1481,8 @@ function SyncedCanvas({
       <ReactFlow
         nodes={nodes}
         edges={directedEdges}
-        nodeTypes={stableNodeTypes}
-        edgeTypes={stableEdgeTypes}
+        nodeTypes={canvasNodeTypes}
+        edgeTypes={canvasEdgeTypes}
         defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
