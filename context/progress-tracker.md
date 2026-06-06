@@ -397,3 +397,10 @@
 - Added regression coverage in `tests/collaborative-canvas-warnings.test.ts` for the compiler opt-out and module-scoped React Flow type maps.
 - Verified with `node --experimental-strip-types tests/collaborative-canvas-warnings.test.ts`, `pnpm lint`, `pnpm format`, and `pnpm run build`.
 - Open questions: none.
+- Current goal: replace the default Next.js README with a public open-source README following the 15-section documentation structure.
+- Replaced `README.md` with project-specific documentation covering overview, features, stack, architecture, setup, configuration, security, contributing, roadmap, acknowledgements, and author details.
+- Added a root MIT `LICENSE` file for Rodrigo Silva.
+- Excluded the local `.worktrees/` directory from git and Biome scanning so untracked nested worktrees do not break repository checks.
+- Verified with `pnpm format` and `pnpm lint`.
+- Next steps: add the real product screenshot at `docs/images/ghost-ai-preview.png` when one is available.
+- Open questions: none.

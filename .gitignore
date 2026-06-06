@@ -48,3 +48,6 @@ next-env.d.ts
 /src/generated/**
 
 .trigger
+
+# local git worktrees
+/.worktrees/
