@@ -20,6 +20,15 @@ function isMissingTaskRunTableError(error: unknown) {
   );
 }
 
+function isMissingProjectSpecTableError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2021"
+  );
+}
+
 function isUniqueConstraintError(error: unknown) {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -36,6 +45,26 @@ async function verifyTaskRunStorage() {
         {
           error:
             "Task run storage is not ready. Run `pnpm prisma migrate dev` before starting a spec run.",
+        },
+        { status: 500 },
+      );
+    }
+
+    throw error;
+  }
+
+  return null;
+}
+
+async function verifySpecStorage() {
+  try {
+    await prisma.projectSpec.count();
+  } catch (error) {
+    if (isMissingProjectSpecTableError(error)) {
+      return Response.json(
+        {
+          error:
+            "Spec storage is not ready. Run `pnpm prisma migrate deploy` before starting a spec run.",
         },
         { status: 500 },
       );
@@ -76,6 +105,12 @@ export async function POST(request: Request) {
 
   if (storageError) {
     return storageError;
+  }
+
+  const specStorageError = await verifySpecStorage();
+
+  if (specStorageError) {
+    return specStorageError;
   }
 
   const idempotencyKey = `spec:${randomUUID()}`;

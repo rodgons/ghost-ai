@@ -8,6 +8,7 @@ import {
 } from "@trigger.dev/sdk";
 import { del, put } from "@vercel/blob";
 import { generateText } from "ai";
+import { Prisma } from "../generated/prisma/client";
 import {
   type SpecGenerationTaskPayload,
   specGenerationTaskPayloadSchema,
@@ -18,6 +19,10 @@ const DEFAULT_SPEC_GENERATION_MODEL = "gemini-2.5-flash-lite";
 const GEMINI_TIMEOUT_MS = 90_000;
 
 function describeError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return `${error.message} Prisma code: ${error.code}. Meta: ${JSON.stringify(error.meta)}.`;
+  }
+
   return error instanceof Error ? error.message : "Unknown error.";
 }
 

@@ -25,6 +25,22 @@ test("Project specs API exposes metadata and Markdown preview content", () => {
   );
 });
 
+test("Spec generation preflights ProjectSpec storage before starting a run", () => {
+  const routeSource = readFileSync("src/app/api/ai/spec/route.ts", "utf8");
+  const storageCheckIndex = routeSource.indexOf("prisma.projectSpec.count()");
+  const triggerIndex = routeSource.indexOf(
+    "tasks.trigger<typeof generateSpec>",
+  );
+
+  assert.notEqual(storageCheckIndex, -1);
+  assert.notEqual(triggerIndex, -1);
+  assert.ok(storageCheckIndex < triggerIndex);
+  assert.match(
+    routeSource,
+    /Spec storage is not ready\. Run `pnpm prisma migrate (?:deploy|dev)` before starting a spec run\./,
+  );
+});
+
 test("Spec download links opt out of native Base UI button semantics", () => {
   const sidebarSource = readFileSync(
     "src/components/editor/ai-workspace-sidebar.tsx",
