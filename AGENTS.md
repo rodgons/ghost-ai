@@ -32,4 +32,3 @@ If implementation changes the architecture, scope, or standards documented in th
 ## Completion Criteria
 
 Only consider the implementation done after run `pnpm lint` and `pnpm format` with no errors.
-
