@@ -51,3 +51,6 @@ next-env.d.ts
 
 # local git worktrees
 /.worktrees/
+
+# local agent tooling
+/.superpowers/
