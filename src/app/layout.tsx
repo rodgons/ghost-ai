@@ -18,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ghost AI",
-  description: "Secure AI workspace powered by Clerk",
+  description:
+    "Collaborative AI workspace for system architecture diagrams and technical specs.",
 };
 
 const themeInitScript = `(() => {

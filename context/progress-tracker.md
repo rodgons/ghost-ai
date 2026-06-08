@@ -404,3 +404,14 @@
 - Verified with `pnpm format` and `pnpm lint`.
 - Next steps: add the real product screenshot at `docs/images/ghost-ai-preview.png` when one is available.
 - Open questions: none.
+- Current goal: build a public Ghost AI landing page for developers and technical founders.
+- Replaced the root redirect-only page with a public, purple-accented landing page that routes authenticated users to `/editor` and signed-out users to `/sign-up` from the primary CTA.
+- Added source-level regression coverage for landing page routing behavior, approved copy, workflow/feature sections, purple identity styling, and metadata positioning.
+- Next steps: run `pnpm format`, `pnpm lint`, and a production build verification.
+- Open questions: none.
+- Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
+- Fixed the remaining home-page redirect by adding `/` to the Clerk proxy public route matcher so middleware no longer protects the landing page before `src/app/page.tsx` renders.
+- Added regression coverage that verifies the Clerk proxy keeps `/` public.
+- Next steps: run focused landing page test, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Open questions: none.
