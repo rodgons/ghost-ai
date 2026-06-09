@@ -242,80 +242,97 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8" id="workflow">
-        <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <h2 className="max-w-xl text-3xl font-semibold tracking-[-0.05em]">
-            From rough prompt to shared architecture.
-          </h2>
-          <p className="max-w-md text-sm leading-6 text-copy-muted">
-            A focused flow for technical teams that need a design artifact, not
-            another blank canvas.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {workflowSteps.map((step, index) => (
-            <article
-              key={step.title}
-              className="rounded-2xl border border-surface-border bg-elevated p-6"
-            >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 text-sm font-bold text-accent-text">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-5 font-semibold">{step.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-copy-muted">
-                {step.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8" id="features">
-        <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <h2 className="max-w-xl text-3xl font-semibold tracking-[-0.05em]">
-            Built around the app&apos;s purple identity.
-          </h2>
-          <p className="max-w-md text-sm leading-6 text-copy-muted">
-            Near-black surfaces, subtle borders, purple CTAs, violet AI accents,
-            and canvas nodes matching the current workspace styling.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3" id="stack">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-
-            return (
-              <article
-                key={feature.title}
-                className="rounded-2xl border border-surface-border bg-elevated p-6"
-              >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 text-accent-text">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-copy-muted">
-                  {feature.description}
-                </p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
-        <div className="flex flex-col justify-between gap-6 rounded-3xl border border-primary/40 bg-surface p-8 md:flex-row md:items-center">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-[-0.05em]">
-              Start with a rough idea. Leave with a shared architecture plan.
+      <div className="bg-zinc-800 pt-5">
+        <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8" id="workflow">
+          <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <h2 className="max-w-xl text-3xl font-semibold tracking-tighter">
+              From rough prompt to shared architecture.
             </h2>
-            <p className="mt-2 text-copy-muted">
-              Designed for developers and technical founders who need clarity
-              before implementation.
+            <p className="max-w-md text-sm leading-6 text-copy-muted">
+              A focused flow for technical teams that need a design artifact,
+              not another blank canvas.
             </p>
           </div>
-          <LandingButton href={startHref} label="Start building" />
+          <div className="grid gap-4 md:grid-cols-3">
+            {workflowSteps.map((step, index) => (
+              <article
+                key={step.title}
+                className="rounded-2xl border border-surface-border bg-elevated p-6"
+              >
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 text-sm font-bold text-accent-text">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className="mt-5 font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-copy-muted">
+                  {step.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8" id="features">
+          <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <h2 className="max-w-xl text-3xl font-semibold tracking-tighter">
+              Built around the app&apos;s purple identity.
+            </h2>
+            <p className="max-w-md text-sm leading-6 text-copy-muted">
+              Near-black surfaces, subtle borders, purple CTAs, violet AI
+              accents, and canvas nodes matching the current workspace styling.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3" id="stack">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+
+              return (
+                <article
+                  key={feature.title}
+                  className="rounded-2xl border border-surface-border bg-elevated p-6"
+                >
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 text-accent-text">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 font-semibold">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-copy-muted">
+                    {feature.description}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
+          <div className="flex flex-col justify-between gap-6 rounded-3xl border border-primary/40 bg-surface p-8 md:flex-row md:items-center">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-[-0.05em]">
+                Start with a rough idea. Leave with a shared architecture plan.
+              </h2>
+              <p className="mt-2 text-copy-muted">
+                Designed for developers and technical founders who need clarity
+                before implementation.
+              </p>
+            </div>
+            <LandingButton href={startHref} label="Start building" />
+          </div>
+        </section>
+      </div>
+
+      <footer className="border-t border-surface-border bg-surface py-6 text-center text-copy-muted">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <p>© {new Date().getFullYear()} Ghost AI. All rights reserved.</p>
+          <p className="mt-2">
+            <a href="mailto:contact@ghost.ai" className="hover:underline">
+              Contact
+            </a>
+            <span className="mx-2">•</span>
+            <a href="/privacy" className="hover:underline">
+              Privacy Policy
+            </a>
+          </p>
         </div>
-      </section>
+      </footer>
     </main>
   );
 }
