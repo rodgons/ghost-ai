@@ -449,3 +449,8 @@
 - Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Next steps: none.
 - Open questions: none.
+- Current goal: make the AI Architect sidebar start open on project editor routes.
+- Updated `/editor/[roomId]` workspace state so the AI sidebar initializes open when entering a project editor.
+- Verified with `pnpm format` and `pnpm lint`.
+- Next steps: none.
+- Open questions: none.

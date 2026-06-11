@@ -43,7 +43,7 @@ export function EditorWorkspace({
   projectName,
 }: WorkspaceProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [aiSidebarOpen, setAiSidebarOpen] = useState(true);
   const [canvasSaveStatus, setCanvasSaveStatus] =
     useState<CanvasSaveStatus>("idle");
   const [canvasSnapshot, setCanvasSnapshot] = useState<CanvasSnapshot>({
