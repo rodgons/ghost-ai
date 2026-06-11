@@ -37,7 +37,7 @@ export function EditorNavbar({
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 h-14 border-b border-navbar-border bg-navbar-bg px-4 text-navbar-text backdrop-blur supports-[backdrop-filter]:bg-navbar-bg",
+        "fixed inset-x-0 top-0 z-50 h-14 border-b border-navbar-border bg-navbar-bg py-0 pr-20 pl-4 text-navbar-text backdrop-blur supports-[backdrop-filter]:bg-navbar-bg sm:pr-24",
         className,
       )}
     >

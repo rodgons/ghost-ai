@@ -37,6 +37,31 @@ test("landing page includes the approved workflow and feature sections", () => {
   assert.match(pageSource, /Spec generation/);
 });
 
+test("landing page links to GitHub from the corner and footer", () => {
+  const pageSource = readFileSync("src/app/page.tsx", "utf8");
+  const layoutSource = readFileSync("src/app/layout.tsx", "utf8");
+
+  assert.match(layoutSource, /https:\/\/github\.com\/rodgons\/ghost-ai/);
+  assert.match(layoutSource, /aria-label="View Ghost AI on GitHub"/);
+  assert.match(layoutSource, /title="Check the app code on GitHub"/);
+  assert.match(layoutSource, /className="github-corner/);
+  assert.match(layoutSource, /className="octo-arm"/);
+  assert.match(layoutSource, /className="octo-body"/);
+  assert.match(
+    layoutSource,
+    /M128\.3,109\.0 C113\.8,99\.7 119\.0,89\.6 119\.0,89\.6/,
+  );
+  assert.match(layoutSource, /target="_blank"/);
+  assert.match(layoutSource, /rel="noreferrer"/);
+  assert.match(pageSource, /href="https:\/\/github\.com\/rodgons"/);
+  assert.match(pageSource, />\s*Contact\s*</);
+  assert.match(pageSource, /target="_blank"/);
+  assert.match(pageSource, /rel="noreferrer"/);
+  assert.match(pageSource, />\s*GitHub\s*</);
+  assert.doesNotMatch(pageSource, /href="\/privacy"/);
+  assert.doesNotMatch(pageSource, /Privacy Policy/);
+});
+
 test("landing page uses purple identity styling", () => {
   const pageSource = readFileSync("src/app/page.tsx", "utf8");
 

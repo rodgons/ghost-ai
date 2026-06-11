@@ -38,6 +38,8 @@ The approved demo uses:
 5. Three-step workflow: prompt the architect, refine the canvas, generate the spec.
 6. Compact feature strip for architecture generation, real-time canvas, and spec generation.
 7. Final CTA: `Start with a rough idea. Leave with a shared architecture plan.`
+8. App-wide GitHub Corner linking to the public source repository.
+9. Footer links for contact and the public GitHub repository, with no privacy policy link.
 
 ## Implementation Constraints
 
@@ -48,6 +50,10 @@ The approved demo uses:
 - Do not add new dependencies.
 - Use the existing `Button` component for CTAs.
 - Use inline SVG or CSS-only markup for the lightweight product preview; do not depend on external images for this page.
+- Add an app-wide GitHub Corner in `src/app/layout.tsx` that links to `https://github.com/rodgons/ghost-ai` and opens in a new tab with `rel="noreferrer"`.
+- Link the footer `Contact` item to `https://github.com/rodgons` and open it in a new tab with `rel="noreferrer"`.
+- Link the footer `GitHub` item to `https://github.com/rodgons/ghost-ai` and open it in a new tab with `rel="noreferrer"`.
+- Remove the footer privacy policy link.
 - Update `src/app/layout.tsx` metadata description to match the product positioning.
 - Update `context/progress-tracker.md` after the implementation change.
 
@@ -61,10 +67,15 @@ Add focused source-level regression coverage that verifies:
 - Landing page copy includes the approved headline and workflow/feature sections.
 - The page uses purple identity classes and avoids cyan/brand-accent CTA treatment.
 - Metadata description matches the landing page product positioning.
+- The app-wide layout includes the GitHub Corner linking to the public source repository.
+- The footer `Contact` link points to the owner's GitHub profile.
+- The footer links to the public GitHub repository and does not include a privacy policy link.
 
 ## Success Criteria
 
 - Public visitors see the landing page instead of being redirected to sign in.
 - Authenticated users can still reach `/editor` from the primary CTA.
 - The page visually matches the approved purple demo and existing app palette.
+- The app-wide GitHub Corner provides a discoverable link to the source repository on every route.
+- The footer provides a contact link to the owner's GitHub profile and a source repository link.
 - `pnpm format` and `pnpm lint` pass.

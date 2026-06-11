@@ -323,12 +323,22 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <p>© {new Date().getFullYear()} Ghost AI. All rights reserved.</p>
           <p className="mt-2">
-            <a href="mailto:contact@ghost.ai" className="hover:underline">
+            <a
+              href="https://github.com/rodgons"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline"
+            >
               Contact
             </a>
             <span className="mx-2">•</span>
-            <a href="/privacy" className="hover:underline">
-              Privacy Policy
+            <a
+              href="https://github.com/rodgons/ghost-ai"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline"
+            >
+              GitHub
             </a>
           </p>
         </div>
