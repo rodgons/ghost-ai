@@ -415,3 +415,37 @@
 - Added regression coverage that verifies the Clerk proxy keeps `/` public.
 - Next steps: run focused landing page test, `pnpm format`, `pnpm lint`, and `pnpm run build`.
 - Open questions: none.
+- Current goal: add the public GitHub repository link to the homepage footer.
+- Added a source-level landing page regression test for the footer GitHub repository link.
+- Added the footer `GitHub` link to `https://github.com/rodgons/ghost-ai` with new-tab external link attributes.
+- Updated the landing page spec and plan to include the footer repository link.
+- Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: none.
+- Open questions: none.
+- Current goal: fix the GitHub Corner artwork so it renders the GitHub logo correctly.
+- Found the corner SVG only included a triangle plus partial Octocat fragments, which rendered as an abstract image instead of the GitHub mark.
+- Added regression coverage for the standard GitHub Corner `octo-arm` and `octo-body` paths.
+- Replaced the partial corner artwork with the standard GitHub Corner SVG structure while preserving the app-wide repository link.
+- Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: none.
+- Open questions: none.
+- Current goal: prevent the app-wide GitHub Corner from covering logged-in editor navbar controls.
+- Added regression coverage requiring the editor navbar to reserve right-side space for the GitHub Corner.
+- Added responsive right padding to `EditorNavbar` so theme/user/project controls stop before the fixed top-right corner.
+- Verified with `node --experimental-strip-types tests/github-corner-navbar-spacing.test.ts`, `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: none.
+- Open questions: none.
+- Current goal: add a tooltip to the app-wide GitHub Corner.
+- Added regression coverage requiring the GitHub Corner to expose `Check the app code on GitHub` as a native browser tooltip.
+- Added the tooltip with a `title` attribute on the GitHub Corner link while preserving the existing accessible label.
+- Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `node --experimental-strip-types tests/github-corner-navbar-spacing.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: none.
+- Open questions: none.
+- Current goal: make the GitHub repository link visible app-wide and simplify homepage footer links.
+- Added a source-level regression test for an app-wide GitHub Corner, footer Contact profile link, and privacy link removal.
+- Added a fixed GitHub Corner in the root layout linking to `https://github.com/rodgons/ghost-ai` so it renders on all pages.
+- Changed homepage footer Contact to link to `https://github.com/rodgons`, kept the project GitHub footer link, and removed Privacy Policy.
+- Updated the landing page spec and plan to include the app-wide corner and footer link behavior.
+- Verified with `node --experimental-strip-types tests/landing-page.test.ts`, `pnpm format`, `pnpm lint`, and `pnpm run build`.
+- Next steps: none.
+- Open questions: none.
